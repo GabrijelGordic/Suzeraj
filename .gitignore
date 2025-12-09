@@ -13,3 +13,8 @@ build/
 
 # Media files (User uploads)
 backend/media/
+
+# Ignore Office files
+*.odt
+*.docx
+*.doc
