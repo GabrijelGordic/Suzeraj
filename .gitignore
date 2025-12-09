@@ -1,0 +1,15 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+db.sqlite3
+.env
+venv/
+env/
+
+# React / Node
+node_modules/
+build/
+.DS_Store
+
+# Media files (User uploads)
+backend/media/
