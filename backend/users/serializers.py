@@ -14,7 +14,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['username', 'email', 'avatar', 'location',
+        fields = ['user_id', 'username', 'email', 'avatar', 'location',
                   'phone_number', 'is_verified', 'seller_rating', 'review_count']
 
     def get_seller_rating(self, obj):

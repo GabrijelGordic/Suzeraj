@@ -1,39 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import api from './api/axios'; // Import our bridge
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import { AuthProvider } from './context/AuthContext'; // <--- Import this
+import Login from './pages/Login';       // <--- Import Login
+import Register from './pages/Register'; // <--- Import Register
+import PublishShoe from './pages/PublishShoe'; // <--- Import
+import SellerProfile from './pages/SellerProfile'; // <--- Import SellerProfile
 
 function App() {
-  const [shoes, setShoes] = useState([]);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    // Try to fetch shoes from the Backend
-    api.get('/api/shoes/')
-      .then(response => {
-        console.log("Data received:", response.data);
-        setShoes(response.data);
-      })
-      .catch(err => {
-        console.error("Error:", err);
-        setError('Failed to connect to Django. Is it running?');
-      });
-  }, []);
-
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Connection Test</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      
-      <h2>Shoes from Database:</h2>
-      {shoes.length === 0 ? <p>No shoes found (or loading...)</p> : (
-        <ul>
-          {shoes.map(shoe => (
-            <li key={shoe.id}>
-              {shoe.title} - ${shoe.price}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <Router>
+      <AuthProvider> {/* <--- WRAP EVERYTHING HERE */}
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/sell" element={<PublishShoe />} />
+          <Route path="/seller/:username" element={<SellerProfile />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
 
