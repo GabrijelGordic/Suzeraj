@@ -7,6 +7,7 @@ import Login from './pages/Login';       // <--- Import Login
 import Register from './pages/Register'; // <--- Import Register
 import PublishShoe from './pages/PublishShoe'; // <--- Import
 import SellerProfile from './pages/SellerProfile'; // <--- Import SellerProfile
+import EditProfile from './pages/EditProfile'; // <--- Import EditProfile
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/sell" element={<PublishShoe />} />
           <Route path="/seller/:username" element={<SellerProfile />} />
+          <Route path="/profile/edit" element={<EditProfile />} />
         </Routes>
       </AuthProvider>
     </Router>

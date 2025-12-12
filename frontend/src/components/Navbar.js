@@ -20,6 +20,7 @@ const Navbar = () => {
                 <Link to="/sell" style={{...styles.link, color: '#4CAF50', fontWeight: 'bold'}}>
                     + Sell Shoe
                 </Link>
+                <Link to="/profile/edit" style={styles.link}>Settings</Link>
 
                 <span style={{color: '#ccc'}}>Hello, {user.username}</span>
                 <button onClick={logout} style={styles.logoutBtn}>Logout</button>
