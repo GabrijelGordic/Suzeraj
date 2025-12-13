@@ -1,10 +1,8 @@
 import axios from 'axios';
 
-// 1. Create the instance with the backend URL
-const api = axios.create({
-    baseURL: 'http://localhost:8000', 
-    // We point to port 8000 where Django is listening
-});
+const API = process.env.REACT_APP_API_URL;
+
+axios.post(`${API}/auth/users/`, data)
 
 // 2. The Interceptor (The Security Guard)
 // Before every request, check if we have a token in LocalStorage
