@@ -7,7 +7,8 @@ class Profile(models.Model):
     avatar = models.ImageField(
         upload_to='avatars/', default='avatars/default.jpg', blank=True)
     location = models.CharField(max_length=100, blank=True)
-    phone_number = models.CharField(max_length=20, blank=True)
+    phone_number = models.CharField(
+        max_length=20, blank=True, null=True, unique=True)
     is_verified = models.BooleanField(default=False)
 
     def __str__(self):

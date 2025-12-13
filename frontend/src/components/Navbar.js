@@ -1,9 +1,16 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+// FIX: Unified import
+import { Link, useNavigate } from 'react-router-dom'; 
 import AuthContext from '../context/AuthContext';
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+      logout();
+      navigate('/');
+  };
 
   return (
     <nav style={styles.nav}>
@@ -11,8 +18,8 @@ const Navbar = () => {
       {/* --- LOGO SECTION --- */}
       <div style={styles.logoContainer}>
         <Link to="/" style={styles.logoLink}>
-            <span style={{ fontWeight: '900' }}>ŠUZE|</span>
-            <span style={{ fontWeight: '400' }}>|RAJ</span>
+            <span style={{ fontWeight: '900' }}>ŠUZ</span>
+            <span style={{ fontWeight: '400' }}>ERAJ</span>
         </Link>
       </div>
 
@@ -25,7 +32,7 @@ const Navbar = () => {
                 <Link to="/sell" className="nav-item nav-sell">SELL</Link>
                 <Link to="/mylistings" className="nav-item">MY KICKS</Link>
                 <Link to="/profile/edit" className="nav-item">SETTINGS</Link>
-                <button onClick={logout} className="nav-item nav-logout">LOGOUT</button>
+                <button onClick={handleLogout} className="nav-item nav-logout">LOGOUT</button>
             </>
         ) : (
             <>
@@ -37,7 +44,6 @@ const Navbar = () => {
 
       {/* --- CSS FOR HOVER EFFECTS --- */}
       <style>{`
-        /* Base Link Style */
         .nav-item {
             font-family: 'Lato', sans-serif;
             color: #333;
@@ -46,36 +52,31 @@ const Navbar = () => {
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
-            padding: 10px 16px; /* Space for the background color */
-            border-radius: 4px; /* Soft corners */
+            padding: 10px 16px;
+            border-radius: 4px;
             transition: all 0.2s ease;
             background-color: transparent;
             border: none;
             cursor: pointer;
         }
 
-        /* 1. Standard Hover: Light Darkening */
         .nav-item:hover {
-            background-color: #f0f0f0; /* Light Grey Wash */
+            background-color: #f0f0f0;
             color: #000;
         }
 
-        /* 2. Sell Button Special Style */
         .nav-sell {
             border: 1px solid #000;
             margin-right: 5px;
         }
-        /* Sell Hover: Invert to Black */
         .nav-sell:hover {
             background-color: #000;
             color: #fff;
         }
 
-        /* 3. Logout Special Style */
         .nav-logout {
             color: #666;
         }
-        /* Logout Hover: Warning Red Background */
         .nav-logout:hover {
             background-color: #ffebee;
             color: #d32f2f;
@@ -85,7 +86,7 @@ const Navbar = () => {
   );
 };
 
-// --- STATIC STYLES (Layout Only) ---
+// --- STATIC STYLES ---
 const styles = {
   nav: {
     display: 'flex',
@@ -110,7 +111,7 @@ const styles = {
   },
   links: {
     display: 'flex',
-    gap: '10px', // Reduced gap because padding adds space now
+    gap: '10px',
     alignItems: 'center',
   }
 };
