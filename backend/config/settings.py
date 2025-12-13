@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 from decouple import config
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,43 +90,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Use PostgreSQL in production, SQLite in development
-if config('DEBUG', default=True, cast=bool):
-    # Development: Use SQLite
+if DATABASE_URL:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
 else:
-    # Production: Use PostgreSQL from DATABASE_URL or config
-    DATABASE_URL = config('DATABASE_URL', default='')
-    if DATABASE_URL:
-        # Parse DATABASE_URL (format: postgresql://user:password@host:port/dbname)
-        import dj_database_url
-        DATABASES = {
-            'default': dj_database_url.config(
-                default=DATABASE_URL,
-                conn_max_age=600
-            )
+    # Local fallback (dev)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
-    else:
-        # Fallback to direct PostgreSQL config
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': config('DB_NAME', default='shoesteraj'),
-                'USER': config('DB_USER', default='postgres'),
-                'PASSWORD': config('DB_PASSWORD', default=''),
-                'HOST': config('DB_HOST', default='localhost'),
-                'PORT': config('DB_PORT', default='5432'),
-                'CONN_MAX_AGE': 600,
-            }
-        }
+    }
 
 
 # Password validation
