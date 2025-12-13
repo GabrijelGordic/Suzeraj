@@ -3,8 +3,8 @@ djangorestframework==3.14.0
 djoser==2.2.3
 django-cors-headers==4.3.0
 django-filter==24.1
-Pillow==10.0.0
+Pillow==11.0.0
 gunicorn==21.2.0
 python-decouple==3.8
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.10
 dj-database-url==2.1.0

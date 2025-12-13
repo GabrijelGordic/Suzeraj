@@ -22,12 +22,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-a@=#ywip279iduhdmf!pahya3hg_#3#&=nam-7b+#4+ilmg=eh')
+SECRET_KEY = config(
+    'SECRET_KEY', default='django-insecure-a@=#ywip279iduhdmf!pahya3hg_#3#&=nam-7b+#4+ilmg=eh')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1',
+                       cast=lambda v: [s.strip() for s in v.split(',')])
 
 
 # Application definition
@@ -169,7 +171,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # CORS Settings (Allow React to talk to Django)
 CORS_ALLOWED_ORIGINS = config(
-    'CORS_ALLOWED_ORIGINS', 
+    'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000',
     cast=lambda v: [s.strip() for s in v.split(',')]
 )
@@ -205,8 +207,10 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='gabrijel.gordic@gmail.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='bevx rrcz rebh azji')
+EMAIL_HOST_USER = config(
+    'EMAIL_HOST_USER', default='gabrijel.gordic@gmail.com')
+EMAIL_HOST_PASSWORD = config(
+    'EMAIL_HOST_PASSWORD', default='bevx rrcz rebh azji')
 DEFAULT_FROM_EMAIL = 'Šuzeraj Security <noreply@shoesteraj.com>'
 
 # Static Files Storage (for production)
@@ -226,4 +230,5 @@ if not DEBUG:
     SECURE_CONTENT_SECURITY_POLICY = {
         "default-src": ("'self'",),
     }
-    ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [s.strip() for s in v.split(',')])
+    ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=lambda v: [
+                           s.strip() for s in v.split(',')])
