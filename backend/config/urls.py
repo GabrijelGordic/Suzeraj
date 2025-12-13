@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from market.views import sitemap_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -13,8 +12,6 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),  # DRF login/logout
     path('api/', include('reviews.urls')),  # Include reviews app URLs
     path('api/', include('users.urls')),  # Include users app URLs
-    # SEO Sitemap
-    path('sitemap.xml', sitemap_view, name='sitemap'),
 ]
 
 # This allows us to see images during development
