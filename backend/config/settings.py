@@ -125,10 +125,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# --- CORS & CSRF CONFIGURATION (CRITICAL FIX) ---
+# --- CORS & CSRF CONFIGURATION ---
 
 # 1. Define the list of trusted URLs
-# Note: Ensure your Render Environment Variable 'CORS_ALLOWED_ORIGINS' contains your Cloudflare URL
 SHARED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="https://shoesteraj.pages.dev,http://localhost:3000,http://127.0.0.1:3000,https://suzeraj-backend.onrender.com",
@@ -141,7 +140,7 @@ CORS_ALLOWED_ORIGINS = SHARED_ORIGINS
 # 3. Apply to CSRF (Write/Post access - Required for Registration)
 CSRF_TRUSTED_ORIGINS = SHARED_ORIGINS
 
-# 4. Regex fallback (Good for Deploy Previews like pr-123.pages.dev)
+# 4. Regex fallback
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https:\/\/.*\.shoesteraj\.pages\.dev$",
 ]
@@ -171,23 +170,23 @@ DJOSER = {
     'SERIALIZERS': {},
 }
 
+# --- EMAIL CONFIGURATION (FIXED) ---
+# Switched to Port 465 (SSL) to fix "Network unreachable" on Render
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-
-# --- CHANGE THESE 3 LINES ---
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587          # Standard for TLS
-EMAIL_USE_TLS = True      # Encrypts after connection
-EMAIL_USE_SSL = False     # Must be False for 587
-EMAIL_TIMEOUT = 30        # Give it time (it runs in background now)
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True    # Secure connection from the start
+EMAIL_USE_TLS = False
+EMAIL_TIMEOUT = 30      # Allow 30s for connection (runs in background thread)
 
 EMAIL_HOST_USER = config(
     'EMAIL_HOST_USER', default='gabrijel.gordic@gmail.com')
+
 # Ensure no spaces in the password
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='ntrbicwsyydwzgkd')
 DEFAULT_FROM_EMAIL = 'Šuzeraj Security <noreply@shoesteraj.com>'
-EMAIL_TIMEOUT = 10  # seconds
+
+
 # --- PRODUCTION SECURITY ---
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
