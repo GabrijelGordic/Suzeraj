@@ -8,81 +8,86 @@ import os
 from decouple import config
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config(
-    'SECRET_KEY',
-    default='django-insecure-a@=#ywip279iduhdmf!pahya3hg_#3#&=nam-7b+#4+ilmg=eh'
-)
+# -----------------------------------------------------------------------------
+# CORE
+# -----------------------------------------------------------------------------
+SECRET_KEY = config("SECRET_KEY", default="CHANGE_ME_IN_RENDER_ENV")
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
-
-# --- HOST CONFIGURATION ---
 ALLOWED_HOSTS = config(
-    'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1,suzeraj-backend.onrender.com',
-    cast=lambda v: [s.strip() for s in v.split(',') if s.strip()]
+    "ALLOWED_HOSTS",
+    default="localhost,127.0.0.1,suzeraj-backend.onrender.com",
+    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
 )
 
-# Application definition
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+# Render reverse proxy / HTTPS headers
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
 
-    # Third Party Dependencies
-    'rest_framework',
-    'rest_framework.authtoken',
-    'djoser',
-    'corsheaders',
-    'django_filters',
+# -----------------------------------------------------------------------------
+# APPLICATIONS
+# -----------------------------------------------------------------------------
+INSTALLED_APPS = [
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    # Third Party
+    "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
+    "corsheaders",
+    "django_filters",
+
+    # Email (Brevo API via Anymail)
+    "anymail",
 
     # Apps
-    'users',
-    'market',
-    'reviews',
+    "users",
+    "market",
+    "reviews",
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # MUST be at the top
-    'django.middleware.security.SecurityMiddleware',
-    # Essential for Render Static Files
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",  # must be at the top
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Render static
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
 
-# --- DATABASE ---
-DATABASE_URL = os.getenv("DATABASE_URL")
+# -----------------------------------------------------------------------------
+# DATABASE
+# -----------------------------------------------------------------------------
+DATABASE_URL = config("DATABASE_URL", default="")
 
 if DATABASE_URL:
     DATABASES = {
@@ -93,7 +98,6 @@ if DATABASE_URL:
         )
     }
 else:
-    # Local fallback (dev)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -101,98 +105,115 @@ else:
         }
     }
 
-# Password validation
+# -----------------------------------------------------------------------------
+# AUTH / PASSWORDS
+# -----------------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Internationalization
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+# -----------------------------------------------------------------------------
+# I18N
+# -----------------------------------------------------------------------------
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# --- STATIC & MEDIA FILES ---
-STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+# -----------------------------------------------------------------------------
+# STATIC & MEDIA
+# -----------------------------------------------------------------------------
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Enable WhiteNoise for serving static files on Render
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# --- CORS & CSRF CONFIGURATION ---
-
-# 1. Define the list of trusted URLs
+# -----------------------------------------------------------------------------
+# CORS & CSRF
+# -----------------------------------------------------------------------------
 SHARED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
-    default="https://shoesteraj.pages.dev,http://localhost:3000,http://127.0.0.1:3000,https://suzeraj-backend.onrender.com",
+    default="https://shoesteraj.pages.dev,http://localhost:3000,http://127.0.0.1:3000",
     cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
 )
 
-# 2. Apply to CORS (Read access)
 CORS_ALLOWED_ORIGINS = SHARED_ORIGINS
-
-# 3. Apply to CSRF (Write/Post access - Required for Registration)
 CSRF_TRUSTED_ORIGINS = SHARED_ORIGINS
 
-# 4. Regex fallback
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^https:\/\/.*\.shoesteraj\.pages\.dev$",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
-# --- REST FRAMEWORK ---
+# -----------------------------------------------------------------------------
+# DRF
+# -----------------------------------------------------------------------------
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 12,
-    'FORMAT_SUFFIX_PATTERNS': False,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 12,
+    "FORMAT_SUFFIX_PATTERNS": False,
 }
 
-# --- DJOSER ---
+# -----------------------------------------------------------------------------
+# DJOSER
+# -----------------------------------------------------------------------------
 DJOSER = {
-    'USER_ID_FIELD': 'username',
-    'LOGIN_FIELD': 'username',
-    'PASSWORD_RESET_CONFIRM_URL': 'password-reset/confirm/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': False,
-    'SERIALIZERS': {},
+    "USER_ID_FIELD": "username",
+    "LOGIN_FIELD": "username",
+    "PASSWORD_RESET_CONFIRM_URL": "password-reset/confirm/{uid}/{token}",
+    "SEND_ACTIVATION_EMAIL": False,
+    "SERIALIZERS": {},
 }
 
-# --- EMAIL CONFIGURATION (FIXED) ---
-# Switched to Port 465 (SSL) to fix "Network unreachable" on Render
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-# Email sa kojim ste se registrovali
-EMAIL_HOST_USER = config('BREVO_SMTP_USER', default='')
-EMAIL_HOST_PASSWORD = config('BREVO_SMTP_KEY', default='')  # SMTP key
+# -----------------------------------------------------------------------------
+# EMAIL (BREVO API - WORKS ON RENDER FREE)
+# -----------------------------------------------------------------------------
+# IMPORTANT:
+# - This is NOT SMTP. This is HTTPS API via Anymail -> works on Render Free.
+# - You must verify sender/domain in Brevo, and set DEFAULT_FROM_EMAIL accordingly.
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+ANYMAIL = {
+    "BREVO_API_KEY": config("BREVO_API_KEY", default=""),
+}
+
 DEFAULT_FROM_EMAIL = config(
-    'DEFAULT_FROM_EMAIL',
-    default='Šuzeraj <gabrijel.gordic@gmail.com>'
-)
-EMAIL_TIMEOUT = 30
+    "DEFAULT_FROM_EMAIL", default="noreply@shoesteraj.com")
 
+# Optional, ali korisno da ne “zaglavi” request ako provider šteka
+EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=15, cast=int)
 
-# --- PRODUCTION SECURITY ---
+# -----------------------------------------------------------------------------
+# LOGGING (da vidiš ako slanje faila)
+# -----------------------------------------------------------------------------
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "root": {"handlers": ["console"], "level": "INFO"},
+    "loggers": {
+        "anymail": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django.request": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+    },
+}
+
+# -----------------------------------------------------------------------------
+# SECURITY (PROD)
+# -----------------------------------------------------------------------------
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_SECURITY_POLICY = {
-        "default-src": ("'self'",),
-    }
