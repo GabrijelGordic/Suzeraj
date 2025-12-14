@@ -179,7 +179,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config(
     'EMAIL_HOST_USER', default='gabrijel.gordic@gmail.com')
 EMAIL_HOST_PASSWORD = config(
-    'EMAIL_HOST_PASSWORD', default='ntrb icws yydw zgkd')
+    'EMAIL_HOST_PASSWORD', default='ntrbicwsyydwzgkd'
+)
 DEFAULT_FROM_EMAIL = 'Šuzeraj Security <noreply@shoesteraj.com>'
 
 # --- PRODUCTION SECURITY ---
