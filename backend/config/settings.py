@@ -171,16 +171,18 @@ DJOSER = {
     'SERIALIZERS': {},
 }
 
-# --- EMAIL ---
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+
+# --- CHANGE THESE 3 LINES ---
+EMAIL_PORT = 465          # Was 587
+EMAIL_USE_SSL = True      # Was False (Secure from the start)
+EMAIL_USE_TLS = False     # Was True
+
 EMAIL_HOST_USER = config(
     'EMAIL_HOST_USER', default='gabrijel.gordic@gmail.com')
-EMAIL_HOST_PASSWORD = config(
-    'EMAIL_HOST_PASSWORD', default='ntrbicwsyydwzgkd'
-)
+# Ensure no spaces in the default string here either
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='ntrbicwsyydwzgkd')
 DEFAULT_FROM_EMAIL = 'Šuzeraj Security <noreply@shoesteraj.com>'
 
 # --- PRODUCTION SECURITY ---
