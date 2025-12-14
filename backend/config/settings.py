@@ -173,18 +173,18 @@ DJOSER = {
 # --- EMAIL CONFIGURATION (FIXED) ---
 # Switched to Port 465 (SSL) to fix "Network unreachable" on Render
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# FIX: Use the legacy host to bypass IPv6 routing issues
-EMAIL_HOST = 'smtp.googlemail.com'
-
+EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_TIMEOUT = 1000
-
-EMAIL_HOST_USER = config(
-    'EMAIL_HOST_USER', default='gabrijel.gordic@gmail.com')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='ntrbicwsyydwzgkd')
-DEFAULT_FROM_EMAIL = 'Šuzeraj Security <noreply@shoesteraj.com>'
+# Email sa kojim ste se registrovali
+EMAIL_HOST_USER = config('BREVO_SMTP_USER', default='')
+EMAIL_HOST_PASSWORD = config('BREVO_SMTP_KEY', default='')  # SMTP key
+DEFAULT_FROM_EMAIL = config(
+    'DEFAULT_FROM_EMAIL',
+    default='Šuzeraj <gabrijel.gordic@gmail.com>'
+)
+EMAIL_TIMEOUT = 30
 
 
 # --- PRODUCTION SECURITY ---
