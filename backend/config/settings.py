@@ -179,7 +179,7 @@ EMAIL_HOST = 'smtp.googlemail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_TIMEOUT = 60
+EMAIL_TIMEOUT = 1000
 
 EMAIL_HOST_USER = config(
     'EMAIL_HOST_USER', default='gabrijel.gordic@gmail.com')
