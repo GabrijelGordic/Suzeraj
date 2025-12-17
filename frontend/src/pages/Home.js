@@ -176,12 +176,12 @@ const Home = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                     
                     {/* Items Per Page Dropdown */}
-                    <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'Lato', fontSize: '0.9rem', color: '#666' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'Lato', fontSize: '1.1rem', color: '#000000ff' }}>
                         <span style={{ marginRight: '8px' }}>Show:</span>
                         <select 
                             value={pageSize} 
                             onChange={(e) => setPageSize(Number(e.target.value))} 
-                            style={{ padding: '5px', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer' }}
+                            style={{ padding: '5px', border: '1px solid #5d5d5dff', borderRadius: '4px', cursor: 'pointer',fontSize: '1.1rem' }}
                         >
                             <option value="12">12</option>
                             <option value="24">24</option>
@@ -189,7 +189,7 @@ const Home = () => {
                         </select>
                     </div>
 
-                    <span style={{ fontFamily: 'Lato', color: '#888', fontSize: '0.9rem' }}>
+                    <span style={{ fontFamily: 'Lato', color: '#000000ff', fontSize: '1.1rem' }}>
                         {shoes.length} Results
                     </span>
                 </div>

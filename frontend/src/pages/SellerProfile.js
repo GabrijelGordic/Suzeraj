@@ -1,92 +1,82 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom'; // Added useLocation
+import React, { useEffect, useState, useContext, useCallback } from 'react'; // 1. Added useCallback
+import { useParams, Link, useLocation } from 'react-router-dom';
 import api from '../api/axios';
 import AuthContext from '../context/AuthContext';
 
 const SellerProfile = () => {
     const { username } = useParams();
     const { user } = useContext(AuthContext); 
-    const location = useLocation(); // Hook to get navigation state
+    const location = useLocation();
     
     const [profile, setProfile] = useState(null);
     const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // Grab success message if we were redirected here (e.g. from Edit Profile)
     const successMsg = location.state?.successMessage;
 
-    const fetchProfile = () => {
+    // 2. Wrapped in useCallback to stabilize the function reference
+    const fetchProfile = useCallback(() => {
         api.get(`/api/profiles/${username}/`)
-            .then(res => {
-                setProfile(res.data);
-                setLoading(false);
+            .then(res => { 
+                setProfile(res.data); 
+                setLoading(false); 
             })
             .catch(err => {
                 console.error("Error fetching profile", err);
                 setLoading(false);
             });
-    };
+    }, [username]); // Only recreate if username changes
 
-    useEffect(() => {
-        fetchProfile();
-        // eslint-disable-next-line
-    }, [username]);
+    // 3. Now it's safe to add fetchProfile to dependencies
+    useEffect(() => { 
+        fetchProfile(); 
+    }, [fetchProfile]);
 
     const handleSubmitReview = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/api/reviews/', {
+            await api.post('/api/reviews/', { 
                 seller: profile.user_id, 
-                rating: reviewForm.rating,
-                comment: reviewForm.comment
+                rating: reviewForm.rating, 
+                comment: reviewForm.comment 
             });
             setMessage('Review submitted successfully!');
             setReviewForm({ rating: 5, comment: '' }); 
             fetchProfile(); 
         } catch (error) {
-            if (error.response && error.response.data.non_field_errors) {
-                setMessage(error.response.data.non_field_errors[0]);
-            } else {
-                setMessage('Failed to submit review.');
-            }
+            setMessage('Failed to submit review.');
         }
     };
 
-    if (loading) return <div style={centerMsg}>Loading Profile...</div>;
-    if (!profile) return <div style={centerMsg}>User not found.</div>;
+    if (loading) return <div style={centerMsg}>LOADING PROFILE...</div>;
+    if (!profile) return <div style={centerMsg}>USER NOT FOUND.</div>;
 
     return (
         <div style={containerStyle}>
-            
-            {/* --- SUCCESS MESSAGE (From Edit Profile) --- */}
-            {successMsg && (
-                <div style={successStyle}>
-                    {successMsg}
-                </div>
-            )}
+            {successMsg && <div style={successStyle}>{successMsg}</div>}
 
             {/* --- HEADER --- */}
             <div style={headerSection}>
-                <img 
-                    src={profile.avatar} 
-                    alt={profile.username} 
-                    style={avatarStyle}
-                />
+                <div style={{ position: 'relative' }}>
+                    <img src={profile.avatar} alt={profile.username} style={avatarStyle} />
+                    <div style={ringStyle}></div>
+                </div>
                 <div style={{ textAlign: 'center' }}>
                     <h1 style={usernameStyle}>{profile.username}</h1>
-                    <p style={locationStyle}>{profile.location || "Location hidden"}</p>
+                    <p style={locationStyle}>{profile.location || "Location Hidden"}</p>
                     <div style={ratingBadge}>
-                        ★ {profile.seller_rating} <span style={{ opacity: 0.6, fontWeight: 'normal' }}>({profile.review_count} REVIEWS)</span>
+                        <span style={{ fontSize: '1.5rem', marginRight: '5px' }}>★</span> {profile.seller_rating} 
+                        <span style={reviewCountStyle}> / {profile.review_count} REVIEWS</span>
                     </div>
                 </div>
             </div>
 
-            <hr style={divider} />
+            <div style={divider}></div>
 
-            {/* --- REVIEW FORM --- */}
-            <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-                <h3 style={sectionTitle}>LEAVE A REVIEW</h3>
+            {/* --- REVIEW FORM (STREETWEAR CARD STYLE) --- */}
+            <div style={streetwearBox}>
+                <h3 style={sectionTitle}>LEAVE FEEDBACK</h3>
                 
                 {message && <div style={msgStyle}>{message}</div>}
 
@@ -94,11 +84,7 @@ const SellerProfile = () => {
                     <form onSubmit={handleSubmitReview}>
                         <div style={groupStyle}>
                             <label style={labelStyle}>RATING</label>
-                            <select 
-                                value={reviewForm.rating} 
-                                onChange={e => setReviewForm({...reviewForm, rating: e.target.value})}
-                                style={selectStyle}
-                            >
+                            <select value={reviewForm.rating} onChange={e => setReviewForm({...reviewForm, rating: e.target.value})} style={selectStyle}>
                                 <option value="5">★★★★★ (Excellent)</option>
                                 <option value="4">★★★★☆ (Good)</option>
                                 <option value="3">★★★☆☆ (Average)</option>
@@ -109,33 +95,23 @@ const SellerProfile = () => {
 
                         <div style={groupStyle}>
                             <label style={labelStyle}>COMMENT</label>
-                            <textarea 
-                                placeholder="Describe your experience..." 
-                                value={reviewForm.comment}
-                                onChange={e => setReviewForm({...reviewForm, comment: e.target.value})}
-                                style={textareaStyle}
-                                rows="3"
-                                required
-                            />
+                            <textarea placeholder="HOW WAS THE EXPERIENCE?" value={reviewForm.comment} onChange={e => setReviewForm({...reviewForm, comment: e.target.value})} style={textareaStyle} rows="3" required />
                         </div>
 
-                        <button type="submit" style={buttonStyle}>
-                            SUBMIT REVIEW
-                        </button>
+                        <button type="submit" style={buttonStyle}>POST REVIEW</button>
                     </form>
                 ) : (
                     <div style={disabledBox}>
-                        {user ? "You cannot review yourself." : <><Link to="/login" style={{color:'#000', fontWeight:'bold'}}>Login</Link> to leave a review.</>}
+                        {user ? "YOU CANNOT REVIEW YOURSELF." : <><Link to="/login" style={{color:'#000', fontWeight:'bold'}}>LOGIN</Link> TO LEAVE A REVIEW.</>}
                     </div>
                 )}
             </div>
 
-            <hr style={divider} />
+            <div style={{ margin: '60px 0', borderBottom: '2px solid #111' }}></div>
 
             {/* --- PAST REVIEWS --- */}
             <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <h3 style={sectionTitle}>RECENT FEEDBACK</h3>
-                
+                <h3 style={{...sectionTitle, textAlign: 'left'}}>RECENT HISTORY</h3>
                 {profile.reviews_list && profile.reviews_list.length > 0 ? (
                     <div>
                         {profile.reviews_list.map((rev, index) => (
@@ -150,56 +126,48 @@ const SellerProfile = () => {
                         ))}
                     </div>
                 ) : (
-                    <p style={{ color: '#999', textAlign: 'center', fontStyle: 'italic' }}>No reviews yet.</p>
+                    <p style={{ color: '#999', fontStyle: 'italic', fontFamily: 'Lato' }}>No reviews yet.</p>
                 )}
             </div>
 
             <style>{`
-                body { font-family: 'Lato', sans-serif; }
-                textarea:focus, select:focus { border-bottom: 1px solid #000 !important; }
+                body { background-color: #FCFCFC; font-family: 'Lato', sans-serif; }
+                textarea:focus, select:focus { border-bottom: 2px solid #000 !important; }
             `}</style>
         </div>
     );
 };
 
 // --- STYLES ---
-
-const containerStyle = { maxWidth: '1000px', margin: '60px auto', padding: '0 20px' };
-const centerMsg = { textAlign: 'center', marginTop: '100px', fontFamily: 'Lato', color: '#888' };
-
-// NEW SUCCESS STYLE
-const successStyle = {
-    backgroundColor: '#e8f5e9',
-    color: '#2e7d32',
-    padding: '15px',
-    marginBottom: '40px',
-    borderRadius: '4px',
-    fontSize: '0.9rem',
-    border: '1px solid #c8e6c9',
-    textAlign: 'center',
-    fontFamily: 'Lato',
-    maxWidth: '600px',
-    margin: '0 auto 40px'
-};
+const containerStyle = { maxWidth: '800px', margin: '60px auto', padding: '0 20px' };
+const centerMsg = { textAlign: 'center', marginTop: '100px', fontFamily: 'Lato', color: '#888', fontWeight: 'bold', letterSpacing: '1px' };
+const successStyle = { backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '15px', marginBottom: '40px', border: '1px solid #c8e6c9', textAlign: 'center', fontFamily: 'Lato' };
 
 const headerSection = { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '40px' };
-const avatarStyle = { width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', marginBottom: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' };
-const usernameStyle = { fontFamily: '"Playfair Display", serif', fontSize: '2.5rem', margin: '0 0 5px 0', color: '#111' };
-const locationStyle = { fontFamily: '"Lato", sans-serif', color: '#999', fontSize: '0.9rem', margin: '0 0 15px 0', textTransform: 'uppercase', letterSpacing: '1px' };
-const ratingBadge = { fontFamily: '"Lato", sans-serif', fontWeight: 'bold', fontSize: '1.2rem', color: '#111' };
-const divider = { border: 'none', borderTop: '1px solid #eee', margin: '50px 0' };
-const sectionTitle = { fontFamily: '"Lato", sans-serif', fontSize: '0.8rem', fontWeight: '700', letterSpacing: '2px', color: '#999', textTransform: 'uppercase', textAlign: 'center', marginBottom: '40px' };
-const groupStyle = { marginBottom: '30px' };
-const labelStyle = { display: 'block', fontSize: '0.75rem', color: '#111', letterSpacing: '1px', marginBottom: '10px', fontWeight: '700' };
-const selectStyle = { width: '100%', border: 'none', borderBottom: '1px solid #e0e0e0', padding: '10px 0', fontSize: '1rem', outline: 'none', fontFamily: '"Lato", sans-serif', backgroundColor: 'transparent', color: '#333', cursor: 'pointer' };
+const avatarStyle = { width: '130px', height: '130px', borderRadius: '50%', objectFit: 'cover', border: '5px solid #fff', position: 'relative', zIndex: 2 };
+const ringStyle = { position: 'absolute', top: -5, left: -5, right: -5, bottom: -5, borderRadius: '50%', border: '2px solid #111', zIndex: 1 };
+const usernameStyle = { fontFamily: '"Playfair Display", serif', fontSize: '3rem', margin: '20px 0 5px 0', color: '#111', lineHeight: 1 };
+const locationStyle = { fontFamily: '"Lato", sans-serif', color: '#999', fontSize: '0.8rem', margin: '0 0 15px 0', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700' };
+const ratingBadge = { fontFamily: '"Lato", sans-serif', fontWeight: 'bold', fontSize: '1.2rem', color: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+const reviewCountStyle = { opacity: 0.5, fontWeight: '400', fontSize: '0.9rem', marginLeft: '5px' };
+
+const divider = { borderTop: '2px solid #111', margin: '50px 0', width: '100px', marginLeft: 'auto', marginRight: 'auto' };
+
+const streetwearBox = { backgroundColor: '#fff', border: '2px solid #111', boxShadow: '8px 8px 0px rgba(0,0,0,0.1)', padding: '40px', maxWidth: '600px', margin: '0 auto' };
+const sectionTitle = { fontFamily: '"Lato", sans-serif', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '2px', color: '#111', textTransform: 'uppercase', textAlign: 'center', marginBottom: '30px' };
+const groupStyle = { marginBottom: '25px' };
+const labelStyle = { display: 'block', fontSize: '0.7rem', color: '#111', letterSpacing: '1px', marginBottom: '8px', fontWeight: '900' };
+const selectStyle = { width: '100%', border: 'none', borderBottom: '1px solid #e0e0e0', padding: '10px 0', fontSize: '1rem', outline: 'none', fontFamily: '"Lato", sans-serif', backgroundColor: 'transparent', color: '#333', cursor: 'pointer', fontWeight: 'bold' };
 const textareaStyle = { width: '100%', border: 'none', borderBottom: '1px solid #e0e0e0', padding: '10px 0', fontSize: '1rem', outline: 'none', fontFamily: '"Lato", sans-serif', backgroundColor: 'transparent', resize: 'none', color: '#333' };
-const buttonStyle = { width: '100%', padding: '18px', backgroundColor: '#111', color: '#fff', border: 'none', fontSize: '0.85rem', fontWeight: '700', letterSpacing: '2px', cursor: 'pointer', marginTop: '10px', transition: 'opacity 0.2s' };
+const buttonStyle = { width: '100%', padding: '18px', backgroundColor: '#111', color: '#fff', border: '2px solid #111', fontSize: '0.85rem', fontWeight: '900', letterSpacing: '2px', cursor: 'pointer', marginTop: '10px', textTransform: 'uppercase' };
+
 const msgStyle = { textAlign: 'center', padding: '15px', backgroundColor: '#f9f9f9', marginBottom: '20px', fontFamily: 'Lato', fontSize: '0.9rem' };
-const disabledBox = { textAlign: 'center', padding: '20px', backgroundColor: '#f9f9f9', color: '#888', fontFamily: 'Lato', fontStyle: 'italic' };
-const reviewItem = { marginBottom: '30px', paddingBottom: '30px', borderBottom: '1px solid #f5f5f5' };
-const reviewerName = { fontFamily: '"Playfair Display", serif', fontSize: '1.2rem', color: '#111' };
-const starsStyle = { color: '#111', letterSpacing: '2px', fontSize: '0.9rem' };
-const commentStyle = { fontFamily: '"Lato", sans-serif', fontSize: '1rem', color: '#555', lineHeight: '1.6', margin: '10px 0' };
-const dateStyle = { fontFamily: '"Lato", sans-serif', fontSize: '0.75rem', color: '#aaa', textTransform: 'uppercase' };
+const disabledBox = { textAlign: 'center', padding: '20px', backgroundColor: '#f9f9f9', color: '#888', fontFamily: 'Lato', fontStyle: 'italic', fontSize: '0.9rem' };
+
+const reviewItem = { marginBottom: '30px', paddingBottom: '30px', borderBottom: '1px solid #eee' };
+const reviewerName = { fontFamily: '"Playfair Display", serif', fontSize: '1.2rem', color: '#111', fontWeight: '700' };
+const starsStyle = { color: '#111', letterSpacing: '2px', fontSize: '0.8rem' };
+const commentStyle = { fontFamily: '"Lato", sans-serif', fontSize: '1rem', color: '#444', lineHeight: '1.6', margin: '10px 0' };
+const dateStyle = { fontFamily: '"Lato", sans-serif', fontSize: '0.7rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' };
 
 export default SellerProfile;
