@@ -11,11 +11,9 @@ const MyListings = () => {
   // Fetch only the logged-in user's shoes
   useEffect(() => {
     if (user) {
-      // Assuming your backend supports filtering by username or returns user's shoes at this endpoint
-      // If this doesn't work, we might need to adjust the query based on your Django views
       api.get(`/api/shoes/?seller_username=${user.username}`) 
         .then(res => {
-          setShoes(res.data.results || res.data); // Handle pagination or list
+          setShoes(res.data.results || res.data); 
           setLoading(false);
         })
         .catch(err => {
@@ -29,7 +27,6 @@ const MyListings = () => {
     if (window.confirm("Are you sure you want to delete this listing?")) {
       try {
         await api.delete(`/api/shoes/${id}/`);
-        // Remove from screen immediately
         setShoes(shoes.filter(shoe => shoe.id !== id));
       } catch (err) {
         alert("Failed to delete item.");
@@ -44,30 +41,37 @@ const MyListings = () => {
     return '€';
   };
 
-  if (loading) return <div style={styles.loading}>Loading your rotation...</div>;
+  if (loading) return (
+    <div style={{...styles.container, display:'flex', justifyContent:'center', alignItems:'center'}}>
+        <p style={{fontFamily: 'Lato', fontWeight:'bold', fontSize:'1.2rem'}}>ACCESSING VAULT...</p>
+    </div>
+  );
 
   return (
     <div style={styles.container}>
       
+      {/* --- HEADER --- */}
       <div style={styles.header}>
-        <h1 style={styles.title}>My Listings</h1>
-        <p style={styles.subtitle}>Manage your active sales.</p>
+        <h1 style={styles.title}>My Rotation</h1>
+        <p style={styles.subtitle}>MANAGE YOUR ACTIVE LISTINGS.</p>
       </div>
 
       {shoes.length === 0 ? (
         <div style={styles.emptyState}>
-          <h3 style={{fontFamily: 'Playfair Display', fontSize:'1.5rem'}}>You haven't listed anything yet.</h3>
+          <h3 style={{fontFamily: '"Bebas Neue", sans-serif', fontSize:'2.5rem', marginBottom:'20px'}}>
+              YOUR VAULT IS EMPTY.
+          </h3>
           <Link to="/sell" style={styles.sellBtn}>START SELLING</Link>
         </div>
       ) : (
         <div style={styles.grid}>
-          {shoes.map((shoe) => (
-            <div key={shoe.id} style={styles.card}>
+          {shoes.map((shoe, index) => (
+            <div key={shoe.id} className="product-card" style={{...styles.card, animationDelay: `${index * 0.05}s`}}>
               
               {/* Image Area */}
-              <Link to={`/shoes/${shoe.id}`} style={{textDecoration:'none'}}>
+              <Link to={`/shoes/${shoe.id}`} style={{textDecoration:'none', display:'block'}}>
                 <div style={styles.imageContainer}>
-                    <img src={shoe.image} alt={shoe.title} style={styles.image} />
+                    <img src={shoe.image} alt={shoe.title} style={styles.image} className="product-image" />
                 </div>
               </Link>
 
@@ -81,6 +85,7 @@ const MyListings = () => {
                 <button 
                     onClick={() => handleDelete(shoe.id)} 
                     style={styles.deleteBtn}
+                    className="delete-btn-hover"
                 >
                     DELETE LISTING
                 </button>
@@ -89,6 +94,25 @@ const MyListings = () => {
           ))}
         </div>
       )}
+
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+        body { font-family: 'Lato', sans-serif; }
+        
+        /* CARD ANIMATIONS */
+        .product-card { opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* IMAGE ZOOM ON HOVER */
+        .product-image { transition: transform 0.5s ease; }
+        .product-card:hover .product-image { transform: scale(1.05); }
+
+        /* DELETE BUTTON HOVER */
+        .delete-btn-hover:hover {
+            background-color: #d32f2f !important;
+            color: #fff !important;
+        }
+      `}</style>
     </div>
   );
 };
@@ -97,7 +121,7 @@ const MyListings = () => {
 const styles = {
   container: {
     padding: '60px 40px',
-    backgroundColor: '#FCFCFC',
+    backgroundColor: '#b1b1b1ff', // Matching Home/Login/Register
     minHeight: '100vh',
   },
   header: {
@@ -105,21 +129,20 @@ const styles = {
     marginBottom: '60px',
   },
   title: {
-    fontFamily: 'Playfair Display',
-    fontSize: '3rem',
+    fontFamily: '"Bebas Neue", sans-serif',
+    fontSize: '4rem',
     margin: '0 0 10px 0',
     color: '#111',
+    letterSpacing: '2px',
+    lineHeight: '0.9',
   },
   subtitle: {
     fontFamily: 'Lato',
-    color: '#888',
-    fontSize: '1.1rem',
-  },
-  loading: {
-      textAlign: 'center',
-      padding: '100px',
-      fontFamily: 'Lato',
-      color: '#999'
+    color: 'rgba(194, 84, 141)', // Matching Home/Login accents
+    fontSize: '1rem',
+    fontWeight: '700',
+    letterSpacing: '4px',
+    textTransform: 'uppercase',
   },
   grid: {
     display: 'grid',
@@ -138,22 +161,21 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: '15px',
-    borderRadius: '4px',
-    boxShadow: '0 5px 15px rgba(0,0,0,0.03)',
+    // Removed border-radius to match the sharp "industrial" look
+    boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
   },
   image: {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
-    transition: 'transform 0.5s ease',
   },
   info: {
       textAlign: 'center',
   },
   brand: {
     margin: '0 0 5px',
-    color: '#999',
-    fontSize: '0.75rem',
+    color: '#555',
+    fontSize: '0.8rem',
     textTransform: 'uppercase',
     letterSpacing: '2px',
     fontWeight: '700',
@@ -161,44 +183,50 @@ const styles = {
   },
   cardTitle: {
     margin: '0 0 10px',
-    fontFamily: '"Playfair Display", serif',
+    fontFamily: '"Lato", sans-serif', // Changed from Playfair to match Home cards
     fontSize: '1.2rem',
-    fontWeight: '400',
+    fontWeight: '900',
     color: '#111',
+    textTransform: 'uppercase',
   },
   price: {
     margin: '0 0 15px 0',
     fontFamily: '"Lato", sans-serif',
-    fontSize: '1rem',
+    fontSize: '1.1rem',
     fontWeight: 'bold',
     color: '#333',
   },
   deleteBtn: {
       backgroundColor: 'transparent',
-      border: '1px solid #d32f2f',
+      border: '2px solid #d32f2f',
       color: '#d32f2f',
-      padding: '8px 15px',
-      fontSize: '0.75rem',
-      fontWeight: '700',
+      padding: '10px 20px',
+      fontSize: '0.8rem',
+      fontWeight: '900',
       letterSpacing: '1px',
       cursor: 'pointer',
       transition: 'all 0.2s',
       marginTop: '5px',
+      textTransform: 'uppercase',
+      fontFamily: 'Lato',
   },
   emptyState: {
       textAlign: 'center',
       padding: '100px 0',
+      color: '#333',
   },
   sellBtn: {
       display: 'inline-block',
       marginTop: '20px',
       backgroundColor: '#111',
       color: '#fff',
-      padding: '15px 30px',
+      padding: '15px 35px',
       textDecoration: 'none',
       fontFamily: 'Lato',
-      fontWeight: 'bold',
-      letterSpacing: '1px',
+      fontWeight: '900',
+      letterSpacing: '2px',
+      border: '2px solid #111',
+      textTransform: 'uppercase',
   }
 };
 

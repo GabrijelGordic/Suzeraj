@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from 'react'; // 1. Added useCallback
+import React, { useEffect, useState, useContext, useCallback } from 'react'; 
 import { useParams, Link, useLocation } from 'react-router-dom';
 import api from '../api/axios';
 import AuthContext from '../context/AuthContext';
@@ -15,7 +15,6 @@ const SellerProfile = () => {
 
     const successMsg = location.state?.successMessage;
 
-    // 2. Wrapped in useCallback to stabilize the function reference
     const fetchProfile = useCallback(() => {
         api.get(`/api/profiles/${username}/`)
             .then(res => { 
@@ -26,9 +25,8 @@ const SellerProfile = () => {
                 console.error("Error fetching profile", err);
                 setLoading(false);
             });
-    }, [username]); // Only recreate if username changes
+    }, [username]); 
 
-    // 3. Now it's safe to add fetchProfile to dependencies
     useEffect(() => { 
         fetchProfile(); 
     }, [fetchProfile]);
@@ -49,32 +47,43 @@ const SellerProfile = () => {
         }
     };
 
-    if (loading) return <div style={centerMsg}>LOADING PROFILE...</div>;
-    if (!profile) return <div style={centerMsg}>USER NOT FOUND.</div>;
+    if (loading) return (
+        <div style={{...containerStyle, display:'flex', justifyContent:'center', alignItems:'center', height:'80vh'}}>
+            <p style={{fontFamily: 'Lato', fontWeight:'bold', fontSize:'1.2rem', color:'#111'}}>ACCESSING PROFILE...</p>
+        </div>
+    );
+    
+    if (!profile) return (
+        <div style={{...containerStyle, display:'flex', justifyContent:'center', alignItems:'center', height:'80vh'}}>
+             <h3 style={{fontFamily: '"Bebas Neue", sans-serif', fontSize:'3rem'}}>USER NOT FOUND.</h3>
+        </div>
+    );
 
     return (
         <div style={containerStyle}>
             {successMsg && <div style={successStyle}>{successMsg}</div>}
 
-            {/* --- HEADER --- */}
-            <div style={headerSection}>
-                <div style={{ position: 'relative' }}>
-                    <img src={profile.avatar} alt={profile.username} style={avatarStyle} />
-                    <div style={ringStyle}></div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                    <h1 style={usernameStyle}>{profile.username}</h1>
-                    <p style={locationStyle}>{profile.location || "Location Hidden"}</p>
-                    <div style={ratingBadge}>
-                        <span style={{ fontSize: '1.5rem', marginRight: '5px' }}>★</span> {profile.seller_rating} 
-                        <span style={reviewCountStyle}> / {profile.review_count} REVIEWS</span>
+            {/* --- PROFILE HEADER CARD --- */}
+            <div style={streetwearBox}>
+                <div style={headerSection}>
+                    <div style={{ position: 'relative' }}>
+                        <img src={profile.avatar} alt={profile.username} style={avatarStyle} />
+                        <div style={ringStyle}></div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <h1 style={usernameStyle}>{profile.username}</h1>
+                        <p style={locationStyle}>{profile.location || "LOCATION HIDDEN"}</p>
+                        <div style={ratingBadge}>
+                            <span style={{ fontSize: '1.5rem', marginRight: '5px' }}>★</span> {profile.seller_rating} 
+                            <span style={reviewCountStyle}> / {profile.review_count} REVIEWS</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div style={divider}></div>
+            <div style={{ height: '40px' }}></div>
 
-            {/* --- REVIEW FORM (STREETWEAR CARD STYLE) --- */}
+            {/* --- REVIEW FORM SECTION --- */}
             <div style={streetwearBox}>
                 <h3 style={sectionTitle}>LEAVE FEEDBACK</h3>
                 
@@ -83,35 +92,37 @@ const SellerProfile = () => {
                 {user && user.username !== profile.username ? (
                     <form onSubmit={handleSubmitReview}>
                         <div style={groupStyle}>
-                            <label style={labelStyle}>RATING</label>
-                            <select value={reviewForm.rating} onChange={e => setReviewForm({...reviewForm, rating: e.target.value})} style={selectStyle}>
-                                <option value="5">★★★★★ (Excellent)</option>
-                                <option value="4">★★★★☆ (Good)</option>
-                                <option value="3">★★★☆☆ (Average)</option>
-                                <option value="2">★★☆☆☆ (Poor)</option>
-                                <option value="1">★☆☆☆☆ (Terrible)</option>
-                            </select>
+                            <label style={labelStyle}>RATING:</label>
+                            <div style={selectWrapper}>
+                                <select value={reviewForm.rating} onChange={e => setReviewForm({...reviewForm, rating: e.target.value})} style={selectStyle}>
+                                    <option value="5">★★★★★ (EXCELLENT)</option>
+                                    <option value="4">★★★★☆ (GOOD)</option>
+                                    <option value="3">★★★☆☆ (AVERAGE)</option>
+                                    <option value="2">★★☆☆☆ (POOR)</option>
+                                    <option value="1">★☆☆☆☆ (TERRIBLE)</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div style={groupStyle}>
-                            <label style={labelStyle}>COMMENT</label>
-                            <textarea placeholder="HOW WAS THE EXPERIENCE?" value={reviewForm.comment} onChange={e => setReviewForm({...reviewForm, comment: e.target.value})} style={textareaStyle} rows="3" required />
+                            <label style={labelStyle}>COMMENT:</label>
+                            <textarea placeholder="HOW WAS THE DEAL?" value={reviewForm.comment} onChange={e => setReviewForm({...reviewForm, comment: e.target.value})} style={textareaStyle} rows="3" required />
                         </div>
 
                         <button type="submit" style={buttonStyle}>POST REVIEW</button>
                     </form>
                 ) : (
                     <div style={disabledBox}>
-                        {user ? "YOU CANNOT REVIEW YOURSELF." : <><Link to="/login" style={{color:'#000', fontWeight:'bold'}}>LOGIN</Link> TO LEAVE A REVIEW.</>}
+                        {user ? "YOU CANNOT REVIEW YOURSELF." : <><Link to="/login" style={{color:'#111', fontWeight:'900', textDecoration:'underline'}}>LOGIN</Link> TO LEAVE A REVIEW.</>}
                     </div>
                 )}
             </div>
 
-            <div style={{ margin: '60px 0', borderBottom: '2px solid #111' }}></div>
+            <div style={{ margin: '60px 0', borderBottom: '2px solid #111', opacity: 0.1 }}></div>
 
             {/* --- PAST REVIEWS --- */}
-            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <h3 style={{...sectionTitle, textAlign: 'left'}}>RECENT HISTORY</h3>
+            <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+                <h3 style={{...sectionTitle, textAlign: 'left', marginBottom:'40px', fontSize:'1.5rem'}}>RECENT HISTORY</h3>
                 {profile.reviews_list && profile.reviews_list.length > 0 ? (
                     <div>
                         {profile.reviews_list.map((rev, index) => (
@@ -126,48 +137,100 @@ const SellerProfile = () => {
                         ))}
                     </div>
                 ) : (
-                    <p style={{ color: '#999', fontStyle: 'italic', fontFamily: 'Lato' }}>No reviews yet.</p>
+                    <p style={{ color: '#555', fontFamily: 'Lato', fontSize:'1.1rem', fontWeight:'bold', textAlign:'center', padding:'40px' }}>NO REVIEWS YET.</p>
                 )}
             </div>
 
             <style>{`
-                body { background-color: #FCFCFC; font-family: 'Lato', sans-serif; }
-                textarea:focus, select:focus { border-bottom: 2px solid #000 !important; }
+                @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+                body { background-color: #b1b1b1ff; font-family: 'Lato', sans-serif; }
+                
+                /* INPUT FOCUS */
+                textarea:focus, select:focus { 
+                    border-bottom: 2px solid #111 !important; 
+                    background-color: rgba(255,255,255,0.3);
+                }
             `}</style>
         </div>
     );
 };
 
 // --- STYLES ---
-const containerStyle = { maxWidth: '800px', margin: '60px auto', padding: '0 20px' };
-const centerMsg = { textAlign: 'center', marginTop: '100px', fontFamily: 'Lato', color: '#888', fontWeight: 'bold', letterSpacing: '1px' };
-const successStyle = { backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '15px', marginBottom: '40px', border: '1px solid #c8e6c9', textAlign: 'center', fontFamily: 'Lato' };
+const containerStyle = { maxWidth: '800px', margin: '0 auto', padding: '60px 20px' };
+const successStyle = { backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '15px', marginBottom: '40px', border: '1px solid #c8e6c9', textAlign: 'center', fontFamily: 'Lato', fontWeight:'bold' };
 
-const headerSection = { display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '40px' };
+// --- CARDS ---
+const streetwearBox = { 
+    backgroundColor: '#fff', // White card for contrast against grey background
+    border: '2px solid #111', 
+    boxShadow: '8px 8px 0px rgba(0,0,0,0.1)', // Hard Shadow
+    padding: '40px', 
+    maxWidth: '600px', 
+    margin: '0 auto' 
+};
+
+// --- HEADER ---
+const headerSection = { display: 'flex', flexDirection: 'column', alignItems: 'center' };
 const avatarStyle = { width: '130px', height: '130px', borderRadius: '50%', objectFit: 'cover', border: '5px solid #fff', position: 'relative', zIndex: 2 };
 const ringStyle = { position: 'absolute', top: -5, left: -5, right: -5, bottom: -5, borderRadius: '50%', border: '2px solid #111', zIndex: 1 };
-const usernameStyle = { fontFamily: '"Playfair Display", serif', fontSize: '3rem', margin: '20px 0 5px 0', color: '#111', lineHeight: 1 };
-const locationStyle = { fontFamily: '"Lato", sans-serif', color: '#999', fontSize: '0.8rem', margin: '0 0 15px 0', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700' };
-const ratingBadge = { fontFamily: '"Lato", sans-serif', fontWeight: 'bold', fontSize: '1.2rem', color: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' };
-const reviewCountStyle = { opacity: 0.5, fontWeight: '400', fontSize: '0.9rem', marginLeft: '5px' };
 
-const divider = { borderTop: '2px solid #111', margin: '50px 0', width: '100px', marginLeft: 'auto', marginRight: 'auto' };
+const usernameStyle = { fontFamily: '"Bebas Neue", sans-serif', fontSize: '3.5rem', margin: '20px 0 5px 0', color: '#111', lineHeight: 1, letterSpacing: '1px' };
+const locationStyle = { fontFamily: '"Lato", sans-serif', color: '#888', fontSize: '0.9rem', margin: '0 0 15px 0', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '900' };
 
-const streetwearBox = { backgroundColor: '#fff', border: '2px solid #111', boxShadow: '8px 8px 0px rgba(0,0,0,0.1)', padding: '40px', maxWidth: '600px', margin: '0 auto' };
-const sectionTitle = { fontFamily: '"Lato", sans-serif', fontSize: '0.9rem', fontWeight: '900', letterSpacing: '2px', color: '#111', textTransform: 'uppercase', textAlign: 'center', marginBottom: '30px' };
+const ratingBadge = { fontFamily: '"Lato", sans-serif', fontWeight: '900', fontSize: '1.2rem', color: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+const reviewCountStyle = { opacity: 0.5, fontWeight: '700', fontSize: '0.8rem', marginLeft: '5px' };
+
+// --- TITLES ---
+const sectionTitle = { fontFamily: '"Bebas Neue", sans-serif', fontSize: '1.5rem', letterSpacing: '1px', color: '#111', textTransform: 'uppercase', textAlign: 'center', marginBottom: '30px', margin: 0 };
+
+// --- FORM INPUTS ---
 const groupStyle = { marginBottom: '25px' };
-const labelStyle = { display: 'block', fontSize: '0.7rem', color: '#111', letterSpacing: '1px', marginBottom: '8px', fontWeight: '900' };
-const selectStyle = { width: '100%', border: 'none', borderBottom: '1px solid #e0e0e0', padding: '10px 0', fontSize: '1rem', outline: 'none', fontFamily: '"Lato", sans-serif', backgroundColor: 'transparent', color: '#333', cursor: 'pointer', fontWeight: 'bold' };
-const textareaStyle = { width: '100%', border: 'none', borderBottom: '1px solid #e0e0e0', padding: '10px 0', fontSize: '1rem', outline: 'none', fontFamily: '"Lato", sans-serif', backgroundColor: 'transparent', resize: 'none', color: '#333' };
-const buttonStyle = { width: '100%', padding: '18px', backgroundColor: '#111', color: '#fff', border: '2px solid #111', fontSize: '0.85rem', fontWeight: '900', letterSpacing: '2px', cursor: 'pointer', marginTop: '10px', textTransform: 'uppercase' };
+const labelStyle = { display: 'block', fontSize: '0.9rem', color: '#111', letterSpacing: '1px', marginBottom: '8px', fontWeight: '900', fontFamily: 'Lato' };
 
-const msgStyle = { textAlign: 'center', padding: '15px', backgroundColor: '#f9f9f9', marginBottom: '20px', fontFamily: 'Lato', fontSize: '0.9rem' };
-const disabledBox = { textAlign: 'center', padding: '20px', backgroundColor: '#f9f9f9', color: '#888', fontFamily: 'Lato', fontStyle: 'italic', fontSize: '0.9rem' };
+const selectWrapper = { position: 'relative', width: '100%' };
+const selectStyle = { 
+    width: '100%', 
+    border: 'none', 
+    borderBottom: '1px solid #999', 
+    padding: '12px 0', 
+    fontSize: '1rem', 
+    outline: 'none', 
+    fontFamily: '"Lato", sans-serif', 
+    backgroundColor: 'transparent', 
+    color: '#111', 
+    cursor: 'pointer', 
+    fontWeight: 'bold',
+    appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 0 center',
+    backgroundSize: '16px',
+};
 
-const reviewItem = { marginBottom: '30px', paddingBottom: '30px', borderBottom: '1px solid #eee' };
-const reviewerName = { fontFamily: '"Playfair Display", serif', fontSize: '1.2rem', color: '#111', fontWeight: '700' };
-const starsStyle = { color: '#111', letterSpacing: '2px', fontSize: '0.8rem' };
-const commentStyle = { fontFamily: '"Lato", sans-serif', fontSize: '1rem', color: '#444', lineHeight: '1.6', margin: '10px 0' };
-const dateStyle = { fontFamily: '"Lato", sans-serif', fontSize: '0.7rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' };
+const textareaStyle = { 
+    width: '100%', 
+    border: 'none', 
+    borderBottom: '1px solid #999', 
+    padding: '12px 0', 
+    fontSize: '1rem', 
+    outline: 'none', 
+    fontFamily: '"Lato", sans-serif', 
+    backgroundColor: 'transparent', 
+    resize: 'vertical', 
+    color: '#111',
+    fontWeight: 'bold'
+};
+
+const buttonStyle = { width: '100%', padding: '18px', backgroundColor: '#111', color: '#fff', border: '2px solid #111', fontSize: '1rem', fontWeight: '900', letterSpacing: '2px', cursor: 'pointer', marginTop: '10px', textTransform: 'uppercase' };
+
+const msgStyle = { textAlign: 'center', padding: '15px', backgroundColor: '#f5f5f5', marginBottom: '20px', fontFamily: 'Lato', fontSize: '0.9rem', fontWeight:'bold' };
+const disabledBox = { textAlign: 'center', padding: '30px', backgroundColor: '#f9f9f9', color: '#666', fontFamily: 'Lato', fontSize: '0.9rem', fontWeight:'bold', letterSpacing:'1px' };
+
+// --- REVIEW LIST ---
+const reviewItem = { marginBottom: '30px', paddingBottom: '30px', borderBottom: '1px solid #999' };
+const reviewerName = { fontFamily: '"Bebas Neue", sans-serif', fontSize: '1.4rem', color: '#111', letterSpacing:'1px' };
+const starsStyle = { color: '#111', letterSpacing: '2px', fontSize: '0.9rem' };
+const commentStyle = { fontFamily: '"Lato", sans-serif', fontSize: '1rem', color: '#333', lineHeight: '1.6', margin: '10px 0', fontWeight:'500' };
+const dateStyle = { fontFamily: '"Lato", sans-serif', fontSize: '0.75rem', color: '#666', textTransform: 'uppercase', letterSpacing: '1px', fontWeight:'700' };
 
 export default SellerProfile;
