@@ -8,7 +8,7 @@ const Footer = () => {
         
         {/* Brand Section */}
         <div style={{ flex: 1, marginBottom: '20px' }}>
-          <h3 style={styles.logo}>SHOE STERAJ</h3>
+          <h3 style={styles.logo}>ŠUZERAJ</h3>
           <p style={styles.text}>The curated marketplace for rare footwear.</p>
         </div>
 
@@ -21,7 +21,7 @@ const Footer = () => {
 
         {/* Copyright */}
         <div style={styles.copy}>
-            &copy; {new Date().getFullYear()} Shoe Steraj Inc. All rights reserved.
+            &copy; {new Date().getFullYear()} ŠUZERAJ Inc. All rights reserved.
         </div>
       </div>
     </footer>
@@ -31,7 +31,7 @@ const Footer = () => {
 const styles = {
   footer: {
     backgroundColor: '#111',
-    color: '#fff',
+    color: '#bb5484',
     padding: '60px 20px',
     marginTop: 'auto', // Pushes footer to bottom
     textAlign: 'center'
