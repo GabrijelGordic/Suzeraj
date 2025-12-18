@@ -131,16 +131,21 @@ const Home = () => {
               display: 'inline-block',
               whiteSpace: 'nowrap'
           }}>
+              {/* --- FLICKERING TITLE --- */}
               <h1 style={{ 
                   fontFamily: '"Bebas Neue", sans-serif', 
                   fontSize: '5rem', 
                   margin: '0 0 10px 0', 
                   lineHeight: '0.9',
                   fontStyle: 'normal', 
-                  letterSpacing: '2px'
+                  letterSpacing: '2px',
+                  // ADDED ANIMATION HERE
+                  opacity: 0, 
+                  animation: 'flicker 2s linear forwards 0.5s' 
               }}>
                   BUY. SELL. TRADE. 
               </h1>
+              
               <p style={{ 
                   fontFamily: 'Lato, sans-serif', 
                   fontSize: '1.2rem', 
@@ -148,7 +153,10 @@ const Home = () => {
                   margin: 0, 
                   letterSpacing: '4px', 
                   textTransform: 'uppercase',
-                  color: '#333'
+                  color: 'rgba(194, 84, 141)',
+                  // Optional: Subtle fade in for subtitle so it doesn't appear before title
+                  opacity: 0,
+                  animation: 'simpleFadeIn 1s ease-out forwards 1.5s'
               }}>
                   Built by sneakerheads, for sneakerheads.
               </p>
@@ -198,12 +206,12 @@ const Home = () => {
           {/* --- MAIN FLEX LAYOUT --- */}
           <div style={flexContainerStyle}>
             
-            {/* 1. STICKY SIDEBAR (UPDATED) */}
+            {/* 1. STICKY SIDEBAR */}
             <aside style={stickyWrapperStyle}>
                 <div 
                     style={{
                         ...animatedSidebarStyle,
-                        width: showFilters ? '280px' : '0px', // Made slightly wider
+                        width: showFilters ? '280px' : '0px', 
                         opacity: showFilters ? 1 : 0,
                         marginRight: showFilters ? '40px' : '0px',
                     }}
@@ -246,7 +254,7 @@ const Home = () => {
                             </button>
                         </div>
 
-                        {/* Accordion List - UPDATED WITH CUSTOM CLASSES */}
+                        {/* Accordion List */}
                         <FilterAccordion title="SORT BY" isOpen={openSections.sort} onToggle={() => toggleSection('sort')}>
                             <div className="custom-select-wrapper">
                                 <select className="custom-select" value={ordering} onChange={e => setOrdering(e.target.value)}>
@@ -364,58 +372,44 @@ const Home = () => {
 
         body { font-family: 'Lato', sans-serif; }
 
-        /* --- NEW SIDEBAR STYLING --- */
-        
-        /* Wrapper to hold the custom arrow */
-        .custom-select-wrapper {
-            position: relative;
-            width: 100%;
+        /* --- FLICKER ANIMATION --- */
+        @keyframes flicker {
+            0% { opacity: 0; }
+            5% { opacity: 0; }
+            6% { opacity: 1; }  /* ON */
+            7% { opacity: 0; }  /* OFF */
+            8% { opacity: 0; }
+            9% { opacity: 1; }  /* ON */
+            10% { opacity: 0; } /* OFF */
+            11% { opacity: 1; } /* ON */
+            15% { opacity: 1; }
+            16% { opacity: 0; } /* OFF */
+            17% { opacity: 1; } /* ON */
+            40% { opacity: 1; }
+            41% { opacity: 0.8; } /* DIM */
+            42% { opacity: 1; }
+            100% { opacity: 1; } /* STABLE */
         }
 
-        /* The actual select element */
+        @keyframes simpleFadeIn {
+            to { opacity: 1; }
+        }
+
+        /* --- SIDEBAR & INPUT STYLING --- */
+        .custom-select-wrapper { position: relative; width: 100%; }
         .custom-select {
-            width: 100%;
-            padding: 12px 15px;
-            appearance: none; /* Hides default browser arrow */
-            -webkit-appearance: none;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 0px; /* Sharp corners for industrial look */
-            font-family: 'Lato', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            
-            /* Custom Arrow SVG encoded as background */
+            width: 100%; padding: 12px 15px; appearance: none; -webkit-appearance: none;
+            background-color: #fff; border: 1px solid #e0e0e0; border-radius: 0px;
+            font-family: 'Lato', sans-serif; fontSize: 0.9rem; font-weight: 500; color: #333;
+            cursor: pointer; transition: all 0.2s ease;
             background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 16px;
+            background-repeat: no-repeat; background-position: right 10px center; background-size: 16px;
         }
-
-        /* Hover/Focus states */
-        .custom-select:hover, .custom-input:hover {
-            border-color: #000; /* Black border on hover */
-        }
-        .custom-select:focus, .custom-input:focus {
-            outline: none;
-            border-color: #000;
-            background-color: #fafafa;
-        }
-
-        /* Inputs (Min/Max) */
+        .custom-select:hover, .custom-input:hover { border-color: #000; }
+        .custom-select:focus, .custom-input:focus { outline: none; border-color: #000; background-color: #fafafa; }
         .custom-input {
-            width: 100%;
-            padding: 12px 15px;
-            background-color: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 0px;
-            font-family: 'Lato', sans-serif;
-            font-size: 0.95rem;
-            color: #333;
-            transition: all 0.2s ease;
+            width: 100%; padding: 12px 15px; background-color: #fff; border: 1px solid #e0e0e0;
+            border-radius: 0px; font-family: 'Lato', sans-serif; fontSize: 0.95rem; color: #333; transition: all 0.2s ease;
         }
 
         /* --- ANIMATIONS --- */
@@ -435,31 +429,11 @@ const Home = () => {
 const FilterAccordion = ({ title, children, isOpen, onToggle }) => {
     return (
       <div style={{ borderBottom: '1px solid #eee', marginBottom: '20px', paddingBottom: '20px' }}>
-        <div 
-          onClick={onToggle} 
-          style={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              cursor: 'pointer', 
-          }}
-        >
-          {/* Made title uppercase and bolder */}
-          <h4 style={{ 
-              margin: 0, 
-              fontSize: '0.9rem', 
-              fontWeight: '900', 
-              letterSpacing: '1px', 
-              textTransform: 'uppercase',
-              color: '#000'
-          }}>
+        <div onClick={onToggle} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+          <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: '900', letterSpacing: '1px', textTransform: 'uppercase', color: '#000' }}>
               {title}
           </h4>
-          
-          {/* Simple plus/minus indicator */}
-          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#000' }}>
-              {isOpen ? '−' : '+'}
-          </span>
+          <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: '#000' }}>{isOpen ? '−' : '+'}</span>
         </div>
         {isOpen && <div style={{ marginTop: '15px' }}>{children}</div>}
       </div>
@@ -468,63 +442,18 @@ const FilterAccordion = ({ title, children, isOpen, onToggle }) => {
 
 // --- STYLES ---
 
-const topBarStyle = {
-    display: 'flex', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginBottom: '30px',
-    width: '100%' 
-};
-
-const flexContainerStyle = { 
-    display: 'flex', 
-    alignItems: 'flex-start', // Important for Sticky Sidebar
-    width: '100%',
-};
-
-// 1. STICKY WRAPPER
-const stickyWrapperStyle = {
-    position: 'sticky',
-    top: '120px', 
-    alignSelf: 'flex-start', // This prevents the sidebar from stretching
-    zIndex: 50, 
-};
-
-// 2. ANIMATED CONTAINER 
-const animatedSidebarStyle = {
-    overflowX: 'hidden', 
-    overflowY: 'auto',   
-    maxHeight: 'calc(100vh - 150px)', 
-    transition: 'all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)', 
-    whiteSpace: 'nowrap', 
-};
-
-const filterToggleBtn = {
-    backgroundColor: '#000',
-    color: '#fff',
-    border: 'none',
-    padding: '12px 25px',
-    fontSize: '0.9rem',
-    fontWeight: '700',
-    cursor: 'pointer',
-    letterSpacing: '1px',
-    fontFamily: 'Lato',
-    display: 'flex',
-    alignItems: 'center',
-    borderRadius: '4px',
-    transition: 'opacity 0.2s ease',
-};
-
-// Removed old styles that are no longer used (selectStyle, smallInput, filterTitle) to keep it clean.
+const topBarStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', width: '100%' };
+const flexContainerStyle = { display: 'flex', alignItems: 'flex-start', width: '100%' };
+const stickyWrapperStyle = { position: 'sticky', top: '120px', alignSelf: 'flex-start', zIndex: 50 };
+const animatedSidebarStyle = { overflowX: 'hidden', overflowY: 'auto', maxHeight: 'calc(100vh - 150px)', transition: 'all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)', whiteSpace: 'nowrap' };
+const filterToggleBtn = { backgroundColor: '#000', color: '#fff', border: 'none', padding: '12px 25px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', letterSpacing: '1px', fontFamily: 'Lato', display: 'flex', alignItems: 'center', borderRadius: '4px', transition: 'opacity 0.2s ease' };
 const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '50px 40px' };
 const imageContainerStyle = { overflow: 'hidden', backgroundColor: '#fff', aspectRatio: '1 / 1.1', display: 'flex', alignItems: 'center', justifyContent: 'center' };
 const imageStyle = { width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.5s ease' };
-
 const brandStyle = { margin: '0 0 5px', color: '#999', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700' };
 const titleStyle = { margin: '0 0 10px', fontFamily: '"Lato", sans-serif', fontSize: '1.2rem', fontWeight: '900', color: '#111' };
 const priceStyle = { margin: '0', fontFamily: '"Lato", sans-serif', fontSize: '1rem', fontWeight: 'bold', color: '#333' };
 const sellerStyle = { margin: '15px 0 0', fontSize: '0.8rem', color: '#aaa', fontStyle: 'italic' };
-
 const pageBtn = { padding: '10px 20px', background: '#111', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '0.8rem' };
 
 export default Home;
