@@ -14,7 +14,7 @@ class Shoe(models.Model):
         ('USD', '$'),
         ('GBP', '£'),
     )
-
+    views = models.PositiveIntegerField(default=0)
     seller = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='shoes')
     title = models.CharField(max_length=100)
@@ -46,3 +46,11 @@ class ShoeImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.shoe.title}"
+
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
+    shoe = models.ForeignKey(Shoe, on_delete=models.CASCADE, related_name='wishlisted_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'shoe') # User can't like the same shoe twice
