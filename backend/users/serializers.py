@@ -15,9 +15,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
     email = serializers.CharField(source='user.email')
     
-    # --- DELETE THE 'location = ...' LINE THAT WAS HERE ---
-    # We want it to use the default 'location' field from the Profile model.
-
     # Calculated fields
     seller_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
@@ -51,33 +48,31 @@ class ProfileSerializer(serializers.ModelSerializer):
         except:
             return []
 
-# --- KEEP THESE CUSTOM USER SERIALIZERS (They are working correctly) ---
-
-# ... existing imports ...
+# --- CUSTOM USER SERIALIZERS ---
 
 class UserCreateSerializer(BaseUserCreateSerializer):
-    location = serializers.CharField(required=False, allow_blank=True)
-    
-    # 1. ADD PHONE NUMBER FIELD (Required)
-    phone_number = serializers.CharField(required=True)
+    # write_only=True ensures these fields don't cause issues in the response
+    location = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    phone_number = serializers.CharField(required=True, write_only=True)
 
     class Meta(BaseUserCreateSerializer.Meta):
         fields = ['id', 'email', 'username', 'password', 'first_name', 'last_name', 'location', 'phone_number']
 
     def validate(self, attrs):
-        # 2. SEPARATE FIELDS
-        location = attrs.pop('location', None)
-        phone_number = attrs.pop('phone_number', None)
+        # 1. REMOVE extra fields from 'attrs' BEFORE calling super()
+        # If we leave them in, Djoser tries to put them into the User model and crashes.
+        location = attrs.pop('location', '')
+        phone_number = attrs.pop('phone_number', '')
 
-        # 3. CHECK UNIQUE PHONE NUMBER MANUALLY
+        # 2. CHECK UNIQUE PHONE NUMBER MANUALLY
         if phone_number:
             if Profile.objects.filter(phone_number=phone_number).exists():
                 raise serializers.ValidationError({"phone_number": "This phone number is already in use."})
 
-        # Standard Validation
+        # 3. NOW it is safe to call Djoser's validation (attrs only contains User fields now)
         attrs = super().validate(attrs)
 
-        # Put them back for create()
+        # 4. Add them back so the create() method can find them later
         if location:
             attrs['location'] = location
         if phone_number:
@@ -86,13 +81,14 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Extract Profile fields
         location = validated_data.pop('location', '')
         phone_number = validated_data.pop('phone_number', '')
 
+        # Create User
         user = super().create(validated_data)
 
         # Save to Profile
-        # We use get_or_create to be safe
         profile, created = Profile.objects.get_or_create(user=user)
         
         if location:
@@ -103,8 +99,6 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         profile.save()
 
         return user
-
-# backend/users/serializers.py
 
 class UserSerializer(BaseUserSerializer):
     # Map these fields from the Profile model

@@ -11,7 +11,6 @@ from django.template.loader import render_to_string
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
-
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
     if not created:
@@ -22,17 +21,18 @@ def create_profile(sender, instance, created, **kwargs):
     Profile.objects.create(user=instance)
 
     # 2) Send welcome email (background thread)
-    # NOTE: Gunicorn/Render može ubiti worker i prekinuti thread.
-    # Ako želiš maksimalnu pouzdanost, pošalji bez threada.
-    send_welcome_email_thread(instance)
+    # UPDATED: Actually use the threading module so registration is instant
+    email_thread = threading.Thread(target=send_welcome_email_thread, args=(instance,))
+    email_thread.start()
 
 
 def send_welcome_email_thread(user):
     ctx = {
         "user": user,
-        "frontend_url": "https://shoesteraj.pages.dev/",
+        "frontend_url": "https://shoesteraj.pages.dev/", # Or your local URL for testing
     }
 
+    # Ensure templates exist, otherwise this will error inside the thread (which is safe)
     subject = render_to_string("emails/welcome_subject.txt", ctx).strip()
     text_body = render_to_string("emails/welcome_body.txt", ctx)
     html_body = render_to_string("emails/welcome_body.html", ctx)
@@ -52,5 +52,6 @@ def send_welcome_email_thread(user):
         logger.info("SUCCESS: Email sent to %s", user.email)
 
     except Exception as e:
+        # This catches the 401 error so the user is still created successfully
         logger.exception(
             "ERROR: Failed to send email to %s. Reason: %s", user.email, e)

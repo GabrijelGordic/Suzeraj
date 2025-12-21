@@ -26,7 +26,7 @@ ALLOWED_HOSTS = config(
 # APPLICATIONS
 # -----------------------------------------------------------------------------
 INSTALLED_APPS = [
-    #'django_extensions',  # HTTPS support for local dev
+    'django_extensions',  # HTTPS support for local dev
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -180,6 +180,8 @@ DJOSER = {
 # -----------------------------------------------------------------------------
 # EMAIL (BREVO API - WORKS ON RENDER FREE)
 # -----------------------------------------------------------------------------
+# settings.py
+
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 ANYMAIL = {
     "BREVO_API_KEY": config("BREVO_API_KEY", default=""),
