@@ -12,13 +12,16 @@ class ShoeImageSerializer(serializers.ModelSerializer):
 class ShoeSerializer(serializers.ModelSerializer):
     seller_username = serializers.ReadOnlyField(source='seller.username')
     
+    # --- ADD THIS LINE ---
+    # Fetches the phone number from the User's Profile
+    seller_phone = serializers.ReadOnlyField(source='seller.profile.phone_number')
+    # ---------------------
+
     # Calculated fields
     seller_rating = serializers.SerializerMethodField()
     views = serializers.ReadOnlyField() 
     is_liked = serializers.SerializerMethodField()
 
-    # RENAME: Frontend expects 'images', but model might use 'gallery'. 
-    # We map it here to ensure frontend compatibility.
     images = ShoeImageSerializer(source='gallery', many=True, read_only=True)
 
     class Meta:
@@ -27,6 +30,7 @@ class ShoeSerializer(serializers.ModelSerializer):
             'id',
             'seller',
             'seller_username',
+            'seller_phone', # <--- ADD THIS to the list
             'seller_rating',
             'title',
             'brand',
@@ -35,13 +39,13 @@ class ShoeSerializer(serializers.ModelSerializer):
             'size',
             'condition',
             'description',
-            'image',        # Main cover image
-            'images',       # Gallery images (was 'gallery')
+            'image',        
+            'images',       
             'contact_info',
             'is_sold',
             'created_at',
-            'views',        # NEW
-            'is_liked'      # NEW
+            'views',
+            'is_liked'
         ]
         read_only_fields = ['seller', 'views', 'is_liked']
 
@@ -50,7 +54,6 @@ class ShoeSerializer(serializers.ModelSerializer):
         return round(avg, 1) if avg else 0
 
     def get_is_liked(self, obj):
-        # Checks if the logged-in user has this shoe in their wishlist
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return Wishlist.objects.filter(user=request.user, shoe=obj).exists()

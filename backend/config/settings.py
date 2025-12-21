@@ -172,7 +172,9 @@ DJOSER = {
     "LOGIN_FIELD": "username",
     "PASSWORD_RESET_CONFIRM_URL": "password-reset/confirm/{uid}/{token}",
     "SEND_ACTIVATION_EMAIL": False,
-    "SERIALIZERS": {},
+    "SERIALIZERS": {'user_create': 'users.serializers.UserCreateSerializer',
+        'user': 'users.serializers.UserSerializer',
+        'current_user': 'users.serializers.UserSerializer',},
 }
 
 # -----------------------------------------------------------------------------

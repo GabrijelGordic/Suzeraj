@@ -36,34 +36,41 @@ class ShoeViewSet(viewsets.ModelViewSet):
     ordering_fields = ['price', 'created_at', 'views']
 
     # --- VIEW COUNT LOGIC ---
+    # --- VIEW COUNT LOGIC (FIXED) ---
     def retrieve(self, request, *args, **kwargs):
         """
-        Increments the view count every time a user opens a shoe detail page.
+        Increments view count ONLY if the viewer is not the seller.
         """
         instance = self.get_object()
-        instance.views += 1
-        instance.save()
+        
+        # FIX: Check if the current user is NOT the seller
+        if instance.seller != request.user:
+            instance.views += 1
+            instance.save()
+            
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
-    # --- WISHLIST: TOGGLE LIKE ---
+    # --- WISHLIST: TOGGLE LIKE (FIXED) ---
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def toggle_wishlist(self, request, pk=None):
-        """
-        POST /api/shoes/{id}/toggle_wishlist/
-        """
         shoe = self.get_object()
         user = request.user
-        
-        # Get or create the like
+
+        # 1. PREVENT SELLER FROM LIKING THEIR OWN SHOE
+        if shoe.seller == user:
+            return Response(
+                {'error': 'You cannot add your own item to the wishlist.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2. Normal Logic
         wishlist_item, created = Wishlist.objects.get_or_create(user=user, shoe=shoe)
 
         if not created:
-            # It existed, so remove it (Unlike)
-            wishlist_item.delete()
+            wishlist_item.delete() # Unliked
             return Response({'status': 'removed', 'is_liked': False}, status=status.HTTP_200_OK)
         else:
-            # It didn't exist, so created it (Like)
             return Response({'status': 'added', 'is_liked': True}, status=status.HTTP_201_CREATED)
 
     # --- WISHLIST: GET FAVORITES ---

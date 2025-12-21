@@ -8,7 +8,10 @@ const MyListings = () => {
   const [shoes, setShoes] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch only the logged-in user's shoes
+  // --- NEW: MODAL STATE ---
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+
   useEffect(() => {
     if (user) {
       api.get(`/api/shoes/?seller_username=${user.username}`) 
@@ -23,15 +26,25 @@ const MyListings = () => {
     }
   }, [user]);
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this listing?")) {
-      try {
-        await api.delete(`/api/shoes/${id}/`);
-        setShoes(shoes.filter(shoe => shoe.id !== id));
-      } catch (err) {
-        alert("Failed to delete item.");
-        console.error(err);
-      }
+  // 1. TRIGGER THE MODAL
+  const promptDelete = (id) => {
+      setItemToDelete(id);
+      setShowDeleteModal(true);
+  };
+
+  // 2. ACTUALLY DELETE ON CONFIRM
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      await api.delete(`/api/shoes/${itemToDelete}/`);
+      setShoes(shoes.filter(shoe => shoe.id !== itemToDelete));
+      setShowDeleteModal(false);
+      setItemToDelete(null);
+    } catch (err) {
+      alert("Failed to delete item.");
+      console.error(err);
+      setShowDeleteModal(false);
     }
   };
 
@@ -81,9 +94,9 @@ const MyListings = () => {
                 <h3 style={styles.cardTitle}>{shoe.title}</h3>
                 <p style={styles.price}>{getCurrencySymbol(shoe.currency)}{shoe.price}</p>
                 
-                {/* DELETE BUTTON */}
+                {/* DELETE BUTTON (Triggers Modal) */}
                 <button 
-                    onClick={() => handleDelete(shoe.id)} 
+                    onClick={() => promptDelete(shoe.id)} 
                     style={styles.deleteBtn}
                     className="delete-btn-hover"
                 >
@@ -95,19 +108,30 @@ const MyListings = () => {
         </div>
       )}
 
+      {/* --- DELETE CONFIRMATION MODAL --- */}
+      {showDeleteModal && (
+            <div style={modalStyles.overlay}>
+                <div style={modalStyles.content}>
+                    <h2 style={modalStyles.header}>DELETE LISTING?</h2>
+                    <p style={modalStyles.text}>This action cannot be undone.</p>
+                    <div style={modalStyles.actions}>
+                        <button onClick={() => setShowDeleteModal(false)} style={modalStyles.cancelBtn}>CANCEL</button>
+                        <button onClick={confirmDelete} style={modalStyles.confirmBtn}>DELETE</button>
+                    </div>
+                </div>
+            </div>
+      )}
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
         body { font-family: 'Lato', sans-serif; }
         
-        /* CARD ANIMATIONS */
         .product-card { opacity: 0; animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* IMAGE ZOOM ON HOVER */
         .product-image { transition: transform 0.5s ease; }
         .product-card:hover .product-image { transform: scale(1.05); }
 
-        /* DELETE BUTTON HOVER */
         .delete-btn-hover:hover {
             background-color: #d32f2f !important;
             color: #fff !important;
@@ -152,7 +176,6 @@ const styles = {
   card: {
     backgroundColor: 'transparent',
     cursor: 'default',
-    
   },
   imageContainer: {
     overflow: 'hidden',
@@ -165,7 +188,6 @@ const styles = {
     boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
     border: '1px solid #b75784',
   },
-  // --- FIXED SECTION ---
   image: { 
     width: '100%', 
     height: '100%', 
@@ -173,7 +195,6 @@ const styles = {
     padding: '10px',      
     transition: 'transform 0.5s ease' 
   },
-  // --------------------
   info: {
       textAlign: 'center',
   },
@@ -233,6 +254,17 @@ const styles = {
       border: '2px solid #111',
       textTransform: 'uppercase',
   }
+};
+
+// --- MODAL STYLES (MATCHING NAVBAR) ---
+const modalStyles = {
+    overlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(5px)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 3000 },
+    content: { backgroundColor: '#fff', padding: '40px', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.3)', border: '1px solid #111' },
+    header: { fontFamily: '"Bebas Neue", sans-serif', fontSize: '2.5rem', margin: '0 0 10px 0', color: '#111', lineHeight: 1 },
+    text: { fontFamily: 'Lato, sans-serif', fontSize: '1rem', color: '#555', marginBottom: '30px', fontWeight: 'bold' },
+    actions: { display: 'flex', gap: '20px', justifyContent: 'center' },
+    cancelBtn: { padding: '12px 25px', backgroundColor: 'transparent', border: '1px solid #ccc', color: '#111', fontFamily: 'Lato, sans-serif', fontWeight: '900', cursor: 'pointer', fontSize: '0.8rem', textTransform: 'uppercase' },
+    confirmBtn: { padding: '12px 25px', backgroundColor: '#d32f2f', border: '1px solid #d32f2f', color: '#fff', fontFamily: 'Lato, sans-serif', fontWeight: '900', cursor: 'pointer', fontSize: '0.8rem', textTransform: 'uppercase' }
 };
 
 export default MyListings;

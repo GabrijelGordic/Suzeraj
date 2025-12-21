@@ -41,7 +41,6 @@ const Home = () => {
       return '€';
   };
 
-  // 1. USECALLBACK prevents infinite loops
   const fetchShoes = useCallback(() => {
     setLoading(true);
     let query = `/api/shoes/?page=${page}&page_size=${pageSize}`;
@@ -71,7 +70,6 @@ const Home = () => {
     if (sizeParam !== null) setPageSize(Number(sizeParam));
   }, [location.search]);
 
-  // 2. FIXED WARNING: Added 'fetchShoes' to dependency array
   useEffect(() => { 
     setPage(1); 
     fetchShoes(); 
@@ -89,14 +87,14 @@ const Home = () => {
     <div style={{ backgroundColor: '#ffffffff', minHeight: '100vh', paddingBottom: '50px'}}>
       <Meta /> 
 
-      {/* HERO BANNER */}
-      <div style={{ width: '100%', height: '800px', marginBottom: '40px', position: 'relative' }}>
+      {/* HERO BANNER - Updated to use CSS classes for responsive text */}
+      <div className="hero-container" style={{ width: '100%', marginBottom: '40px', position: 'relative' }}>
           <img src={heroBanner} alt="Sneaker Collection" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'rgba(252, 247, 247, 0.90)', padding: '30px 60px', textAlign: 'center', color: 'black', borderRadius: '2px', display: 'inline-block', whiteSpace: 'nowrap' }}>
-              <h1 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '5rem', margin: '0 0 10px 0', lineHeight: '0.9', fontStyle: 'normal', letterSpacing: '2px', opacity: 0, animation: 'flicker 2s linear forwards 0.5s' }}>
+          <div className="hero-text-box" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'rgba(252, 247, 247, 0.90)', textAlign: 'center', color: 'black', borderRadius: '2px', display: 'inline-block', whiteSpace: 'nowrap' }}>
+              <h1 className="hero-title" style={{ fontFamily: '"Bebas Neue", sans-serif', margin: '0 0 10px 0', lineHeight: '0.9', fontStyle: 'normal', letterSpacing: '2px', opacity: 0, animation: 'flicker 2s linear forwards 0.5s' }}>
                   BUY. SELL. TRADE. 
               </h1>
-              <p style={{ fontFamily: 'Lato, sans-serif', fontSize: '1.2rem', fontWeight: '700', margin: 0, letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(194, 84, 141)', opacity: 0, animation: 'simpleFadeIn 1s ease-out forwards 1.5s' }}>
+              <p className="hero-subtitle" style={{ fontFamily: 'Lato, sans-serif', fontWeight: '700', margin: 0, letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(194, 84, 141)', opacity: 0, animation: 'simpleFadeIn 1s ease-out forwards 1.5s' }}>
                   Built by sneakerheads, for sneakerheads.
               </p>
           </div>
@@ -256,6 +254,20 @@ const Home = () => {
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.3); border-radius: 20px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(0,0,0,0.5); }
 
+        /* HERO RESPONSIVE TEXT */
+        .hero-container { height: 800px; }
+        .hero-text-box { padding: 30px 60px; }
+        .hero-title { font-size: 5rem; }
+        .hero-subtitle { font-size: 1.2rem; }
+
+        /* MOBILE MEDIA QUERY */
+        @media (max-width: 768px) {
+            .hero-container { height: 500px; } /* Smaller banner height on mobile */
+            .hero-text-box { padding: 20px 30px; width: 85%; }
+            .hero-title { font-size: 3rem !important; margin-bottom: 5px; } /* Shrink Title */
+            .hero-subtitle { font-size: 0.8rem !important; letter-spacing: 2px; } /* Shrink Subtitle */
+        }
+
         /* ANIMATIONS & INPUTS */
         @keyframes flicker { 0% { opacity: 0; } 6% { opacity: 1; } 7% { opacity: 0; } 9% { opacity: 1; } 11% { opacity: 1; } 16% { opacity: 0; } 17% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0.8; } 42% { opacity: 1; } 100% { opacity: 1; } }
         @keyframes simpleFadeIn { to { opacity: 1; } }
@@ -297,8 +309,8 @@ const imageContainerStyle = { overflow: 'hidden', backgroundColor: '#fff', aspec
 const imageStyle = { 
     width: '100%', 
     height: '100%', 
-    objectFit: 'contain', // CHANGED FROM COVER TO CONTAIN
-    padding: '10px',      // Adds breathing room so shoe isn't touching edges
+    objectFit: 'contain', 
+    padding: '10px',
     transition: 'transform 0.5s ease' 
 };
 const brandStyle = { margin: '0 0 5px', color: '#764a6aff', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700' };

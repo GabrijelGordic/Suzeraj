@@ -17,6 +17,15 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [mobileMenuOpen]);
+
+  useEffect(() => {
     setShowDropdown(false);
     setShowLogoutModal(false);
     setMobileMenuOpen(false); 
@@ -148,6 +157,7 @@ const Navbar = () => {
 
             {mobileMenuOpen && (
                 <div className="mobile-menu-overlay">
+                    
                     <form onSubmit={handleSearch} className="search-form mobile-search">
                         <div className="input-wrapper">
                             <input 
@@ -172,7 +182,7 @@ const Navbar = () => {
                             <Link to={`/seller/${user.username}`} className="mobile-link small">Public Profile</Link>
                             <Link to="/edit-profile" className="mobile-link small">Settings</Link>
                             <Link to="/wishlist" className="mobile-link small">Wishlist</Link>
-                            <button onClick={triggerLogout} className="mobile-link logout">LOG OUT</button>
+                            <button onClick={triggerLogout} className="mobile-link logout">Log Out</button>
                         </>
                     ) : (
                         <>
@@ -237,16 +247,9 @@ const Navbar = () => {
             .avatar-placeholder { width: 40px; height: 40px; border-radius: 50%; background: #b75784; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; border: 2px solid #fff; font-family: Lato; }
             
             .dropdown-menu { 
-                position: absolute; 
-                top: 120%; 
-                right: 0; 
-                width: 200px; 
-                background-color: rgb(22, 21, 21); 
-                border: 1px solid #000; 
-                border-radius: 8px; 
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
-                padding: 10px 0; 
-                z-index: 2001; 
+                position: absolute; top: 120%; right: 0; width: 200px; 
+                background-color: rgb(22, 21, 21); border: 1px solid #000; border-radius: 8px; 
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1); padding: 10px 0; z-index: 2001; 
             }
             .user-info { padding: 10px 15px; border-bottom: 1px solid #b75784; font-family: 'Lato'; margin-bottom: 5px; }
             .menu-item { display: block; padding: 10px 15px; font-family: 'Lato'; font-size: 0.9rem; color: white; text-decoration: none; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
@@ -264,14 +267,22 @@ const Navbar = () => {
                 
                 .mobile-menu-overlay {
                     display: flex; flex-direction: column;
-                    position: fixed; top: 90px; left: 0; right: 0; bottom: 0;
-                    background-color: #111; padding: 30px;
+                    position: fixed; 
+                    top: 90px; left: 0; right: 0; bottom: 0;
+                    background-color: #111; 
+                    padding: 30px;
                     z-index: 2002;
                     overflow-y: auto;
                     animation: slideDown 0.3s ease-out;
+                    height: calc(100vh - 90px);
                 }
                 
-                .mobile-search { width: 100%; max-width: none; margin: 0 0 30px 0; }
+                .mobile-search { 
+                    width: 100%; 
+                    max-width: none; 
+                    margin: 0 0 30px 0; 
+                    flex: 0; 
+                }
                 
                 .mobile-link { 
                     font-family: 'Bebas Neue', sans-serif; 
@@ -281,9 +292,28 @@ const Navbar = () => {
                     margin-bottom: 20px; 
                     display: block; 
                 }
-                .mobile-link.small { font-family: 'Lato'; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: #ccc; }
+                .mobile-link.small { 
+                    font-family: 'Lato'; 
+                    font-size: 1.2rem; 
+                    font-weight: bold; 
+                    margin-bottom: 15px; 
+                    color: #ccc; 
+                }
                 .mobile-link.highlight { color: #b75784; }
-                .mobile-link.logout { color: #d32f2f; background: none; border: none; text-align: left; padding: 0; cursor: pointer; font-family: 'Lato'; font-weight: 900; margin-top: 20px; }
+                
+                .mobile-link.logout { 
+                    font-family: 'Lato'; 
+                    font-size: 1.2rem; 
+                    font-weight: bold; 
+                    margin-bottom: 15px; 
+                    color: #d32f2f; /* Keep red but use matching font style */
+                    background: none; 
+                    border: none; 
+                    text-align: left; 
+                    padding: 0; 
+                    cursor: pointer; 
+                    margin-top: 0; 
+                }
                 
                 .mobile-divider { height: 1px; background-color: #333; margin: 20px 0; width: 100%; }
                 .mobile-label { font-family: 'Lato'; font-size: 0.8rem; color: #666; font-weight: 900; margin-bottom: 15px; display: block; letter-spacing: 1px; }
