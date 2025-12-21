@@ -26,7 +26,7 @@ ALLOWED_HOSTS = config(
 # APPLICATIONS
 # -----------------------------------------------------------------------------
 INSTALLED_APPS = [
-    'django_extensions',  # HTTPS support for local dev
+    #'django_extensions',  # HTTPS support for local dev
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
