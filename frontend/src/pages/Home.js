@@ -84,124 +84,120 @@ const Home = () => {
   };
 
   return (
-    <div style={{ backgroundColor: '#ffffffff', minHeight: '100vh', paddingBottom: '50px'}}>
+    <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', paddingBottom: '50px', overflowX: 'hidden' }}>
       <Meta /> 
 
-      {/* HERO BANNER - Updated to use CSS classes for responsive text */}
-      <div className="hero-container" style={{ width: '100%', marginBottom: '40px', position: 'relative' }}>
-          <img src={heroBanner} alt="Sneaker Collection" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div className="hero-text-box" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: 'rgba(252, 247, 247, 0.90)', textAlign: 'center', color: 'black', borderRadius: '2px', display: 'inline-block', whiteSpace: 'nowrap' }}>
-              <h1 className="hero-title" style={{ fontFamily: '"Bebas Neue", sans-serif', margin: '0 0 10px 0', lineHeight: '0.9', fontStyle: 'normal', letterSpacing: '2px', opacity: 0, animation: 'flicker 2s linear forwards 0.5s' }}>
+      {/* HERO BANNER */}
+      <div className="hero-container">
+          <img src={heroBanner} alt="Sneaker Collection" className="hero-image" />
+          <div className="hero-text-box">
+              <h1 className="hero-title">
                   BUY. SELL. TRADE. 
               </h1>
-              <p className="hero-subtitle" style={{ fontFamily: 'Lato, sans-serif', fontWeight: '700', margin: 0, letterSpacing: '4px', textTransform: 'uppercase', color: 'rgba(194, 84, 141)', opacity: 0, animation: 'simpleFadeIn 1s ease-out forwards 1.5s' }}>
+              <p className="hero-subtitle">
                   Built by sneakerheads, for sneakerheads.
               </p>
           </div>
       </div>
 
-      <div style={{ padding: '0 40px' }}>
+      <div className="main-content-pad">
           
           {/* TOP BAR */}
-          <div style={topBarStyle}>
-                <button onClick={() => setShowFilters(!showFilters)} style={filterToggleBtn}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:'8px'}}>
+          <div className="top-bar-container">
+                <button onClick={() => setShowFilters(!showFilters)} className="filter-toggle-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:'6px'}}>
                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
                     </svg>
                     {showFilters ? 'HIDE FILTERS' : 'SHOW FILTERS'}
                 </button>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', fontFamily: 'Lato', fontSize: '1.1rem', color: '#000000ff' }}>
-                        <span style={{ marginRight: '8px' }}>Show:</span>
-                        <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} style={{ padding: '5px', border: '1px solid #5d5d5dff', borderRadius: '4px', cursor: 'pointer',fontSize: '1.1rem' }}>
+                
+                <div className="top-bar-right">
+                    <div className="page-size-selector">
+                        <span style={{ marginRight: '6px' }}>Show:</span>
+                        <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} className="page-select">
                             <option value="12">12</option><option value="24">24</option><option value="48">48</option>
                         </select>
                     </div>
-                    <span style={{ fontFamily: 'Lato', color: '#000000ff', fontSize: '1.1rem' }}>{shoes.length} Results</span>
+                    <span className="results-text">{shoes.length} Results</span>
                 </div>
           </div>
 
           <div style={flexContainerStyle}>
             
-            {/* SIDEBAR */}
-            <aside style={stickyWrapperStyle}>
-                <div 
-                    className="custom-scrollbar"
-                    style={{
-                        ...animatedSidebarStyle,
-                        width: showFilters ? '320px' : '0px', 
-                        opacity: showFilters ? 1 : 0,
-                        marginRight: showFilters ? '40px' : '0px',
-                        paddingRight: '20px', 
-                    }}
-                >
-                    <div style={{ width: '100%' }}> 
-                        
-                        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom: '25px', borderBottom: '2px solid #000', paddingBottom: '10px' }}>
-                            <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '2rem', margin: 0, lineHeight: 1, letterSpacing: '1px' }}>FILTERS</h3>
-                            <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: '#000000ff', fontSize: '0.8rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'Lato', textTransform: 'uppercase', fontWeight: 'bold' }}>Clear All</button>
-                        </div>
+            {/* SIDEBAR - NOW USING CSS CLASS TOGGLING */}
+            <aside className={`filter-sidebar ${showFilters ? 'open' : ''}`}>
+                
+                {/* MOBILE CLOSE BUTTON */}
+                <div className="mobile-close-header" onClick={() => setShowFilters(false)}>
+                    <span>FILTERS</span>
+                    <span>✕</span>
+                </div>
 
-                        <FilterAccordion title="SORT BY" isOpen={openSections.sort} onToggle={() => toggleSection('sort')}>
-                            <div className="custom-select-wrapper">
-                                <select className="custom-select" value={ordering} onChange={e => setOrdering(e.target.value)}>
-                                    <option value="-created_at">Newest First</option>
-                                    <option value="created_at">Oldest First</option>
-                                    <option value="price">Price: Low to High</option>
-                                    <option value="-price">Price: High to Low</option>
-                                </select>
-                            </div>
-                        </FilterAccordion>
-
-                        <FilterAccordion title="PRICE RANGE" isOpen={openSections.price} onToggle={() => toggleSection('price')}>
-                            <div style={{display: 'flex', gap: '10px', marginBottom:'10px'}}>
-                                <input type="number" placeholder="Min" value={minPrice} onChange={e => setMinPrice(e.target.value)} className="custom-input" />
-                                <input type="number" placeholder="Max" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} className="custom-input" />
-                            </div>
-                            <div className="custom-select-wrapper">
-                                <select className="custom-select" value={currencyFilter} onChange={e => setCurrencyFilter(e.target.value)}>
-                                    <option value="">Any Currency</option>
-                                    <option value="EUR">EUR (€)</option>
-                                    <option value="USD">USD ($)</option>
-                                    <option value="GBP">GBP (£)</option>
-                                </select>
-                            </div>
-                        </FilterAccordion>
-
-                        <FilterAccordion title="BRAND" isOpen={openSections.brand} onToggle={() => toggleSection('brand')}>
-                            <div className="custom-select-wrapper">
-                                <select className="custom-select" value={brand} onChange={e => setBrand(e.target.value)}>
-                                    <option value="">All Brands</option>
-                                    <option value="Nike">Nike</option>
-                                    <option value="Adidas">Adidas</option>
-                                    <option value="Jordan">Jordan</option>
-                                    <option value="Yeezy">Yeezy</option>
-                                    <option value="New Balance">New Balance</option>
-                                    <option value="Asics">Asics</option>
-                                    <option value="Converse">Converse</option>
-                                </select>
-                            </div>
-                        </FilterAccordion>
-
-                        <FilterAccordion title="SIZE (EU)" isOpen={openSections.size} onToggle={() => toggleSection('size')}>
-                            <div className="custom-select-wrapper">
-                                <select className="custom-select" value={size} onChange={e => setSize(e.target.value)}>
-                                    <option value="">Any Size</option>
-                                    {SIZE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                                </select>
-                            </div>
-                        </FilterAccordion>
-
-                        <FilterAccordion title="CONDITION" isOpen={openSections.condition} onToggle={() => toggleSection('condition')}>
-                            <div className="custom-select-wrapper">
-                                <select className="custom-select" value={condition} onChange={e => setCondition(e.target.value)}>
-                                    <option value="">Any Condition</option>
-                                    <option value="New">New / Deadstock</option>
-                                    <option value="Used">Used / Worn</option>
-                                </select>
-                            </div>
-                        </FilterAccordion>
+                <div style={{ width: '100%' }}> 
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom: '25px', borderBottom: '2px solid #000', paddingBottom: '10px' }}>
+                        <h3 style={{ fontFamily: '"Bebas Neue", sans-serif', fontSize: '2rem', margin: 0, lineHeight: 1, letterSpacing: '1px' }}>FILTERS</h3>
+                        <button onClick={clearFilters} style={{ background: 'none', border: 'none', color: '#000000ff', fontSize: '0.8rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'Lato', textTransform: 'uppercase', fontWeight: 'bold' }}>Clear All</button>
                     </div>
+
+                    <FilterAccordion title="SORT BY" isOpen={openSections.sort} onToggle={() => toggleSection('sort')}>
+                        <div className="custom-select-wrapper">
+                            <select className="custom-select" value={ordering} onChange={e => setOrdering(e.target.value)}>
+                                <option value="-created_at">Newest First</option>
+                                <option value="created_at">Oldest First</option>
+                                <option value="price">Price: Low to High</option>
+                                <option value="-price">Price: High to Low</option>
+                            </select>
+                        </div>
+                    </FilterAccordion>
+
+                    <FilterAccordion title="PRICE RANGE" isOpen={openSections.price} onToggle={() => toggleSection('price')}>
+                        <div style={{display: 'flex', gap: '10px', marginBottom:'10px'}}>
+                            <input type="number" placeholder="Min" value={minPrice} onChange={e => setMinPrice(e.target.value)} className="custom-input" />
+                            <input type="number" placeholder="Max" value={maxPrice} onChange={e => setMaxPrice(e.target.value)} className="custom-input" />
+                        </div>
+                        <div className="custom-select-wrapper">
+                            <select className="custom-select" value={currencyFilter} onChange={e => setCurrencyFilter(e.target.value)}>
+                                <option value="">Any Currency</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="USD">USD ($)</option>
+                                <option value="GBP">GBP (£)</option>
+                            </select>
+                        </div>
+                    </FilterAccordion>
+
+                    <FilterAccordion title="BRAND" isOpen={openSections.brand} onToggle={() => toggleSection('brand')}>
+                        <div className="custom-select-wrapper">
+                            <select className="custom-select" value={brand} onChange={e => setBrand(e.target.value)}>
+                                <option value="">All Brands</option>
+                                <option value="Nike">Nike</option>
+                                <option value="Adidas">Adidas</option>
+                                <option value="Jordan">Jordan</option>
+                                <option value="Yeezy">Yeezy</option>
+                                <option value="New Balance">New Balance</option>
+                                <option value="Asics">Asics</option>
+                                <option value="Converse">Converse</option>
+                            </select>
+                        </div>
+                    </FilterAccordion>
+
+                    <FilterAccordion title="SIZE (EU)" isOpen={openSections.size} onToggle={() => toggleSection('size')}>
+                        <div className="custom-select-wrapper">
+                            <select className="custom-select" value={size} onChange={e => setSize(e.target.value)}>
+                                <option value="">Any Size</option>
+                                {SIZE_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                        </div>
+                    </FilterAccordion>
+
+                    <FilterAccordion title="CONDITION" isOpen={openSections.condition} onToggle={() => toggleSection('condition')}>
+                        <div className="custom-select-wrapper">
+                            <select className="custom-select" value={condition} onChange={e => setCondition(e.target.value)}>
+                                <option value="">Any Condition</option>
+                                <option value="New">New / Deadstock</option>
+                                <option value="Used">Used / Worn</option>
+                            </select>
+                        </div>
+                    </FilterAccordion>
                 </div>
             </aside>
 
@@ -210,7 +206,7 @@ const Home = () => {
                 {loading ? (
                     <p style={{textAlign:'center', padding:'50px'}}>Updating results...</p>
                 ) : (
-                    <div style={gridStyle}>
+                    <div className="grid-responsive">
                         {shoes.length > 0 ? shoes.map((shoe, index) => (
                             <div key={shoe.id} className="product-card" style={{animationDelay: `${index * 0.05}s`}}>
                                 <Link to={`/shoes/${shoe.id}`} style={{ display: 'block', textDecoration: 'none' }}>
@@ -246,41 +242,120 @@ const Home = () => {
       
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
-        body { font-family: 'Lato', sans-serif; }
+        body { font-family: 'Lato', sans-serif; margin: 0; padding: 0; }
+        * { box-sizing: border-box; }
 
-        /* CUSTOM SCROLLBAR CSS */
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.3); border-radius: 20px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(0,0,0,0.5); }
+        /* --- HERO SECTION --- */
+        .hero-container { 
+            width: 100vw; 
+            margin-left: calc(50% - 50vw); 
+            height: 800px; 
+            margin-bottom: 40px; 
+            position: relative; 
+        }
+        .hero-image { width: 100%; height: 100%; object-fit: cover; }
+        .hero-text-box {
+            position: absolute; 
+            top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            background-color: rgba(252, 247, 247, 0.90); 
+            text-align: center; color: black; border-radius: 2px; padding: 30px 60px;
+            display: inline-block; z-index: 10;
+        }
+        .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: 5rem; margin: 0 0 10px 0; line-height: 0.9; letter-spacing: 2px; opacity: 0; animation: flicker 2s linear forwards 0.5s; }
+        .hero-subtitle { font-family: 'Lato', sans-serif; fontWeight: 700; margin: 0; letterSpacing: 4px; text-transform: uppercase; color: rgba(194, 84, 141); opacity: 0; animation: simpleFadeIn 1s ease-out forwards 1.5s; fontSize: 1.2rem; }
 
-        /* HERO RESPONSIVE TEXT */
-        .hero-container { height: 800px; }
-        .hero-text-box { padding: 30px 60px; }
-        .hero-title { font-size: 5rem; }
-        .hero-subtitle { font-size: 1.2rem; }
+        .main-content-pad { padding: 0 40px; }
 
-        /* MOBILE MEDIA QUERY */
-        @media (max-width: 768px) {
-            .hero-container { height: 500px; } /* Smaller banner height on mobile */
-            .hero-text-box { padding: 20px 30px; width: 85%; }
-            .hero-title { font-size: 3rem !important; margin-bottom: 5px; } /* Shrink Title */
-            .hero-subtitle { font-size: 0.8rem !important; letter-spacing: 2px; } /* Shrink Subtitle */
+        /* --- SIDEBAR STYLES (New) --- */
+        .filter-sidebar {
+            /* Desktop Default */
+            position: sticky;
+            top: 120px;
+            align-self: flex-start;
+            z-index: 50;
+            height: calc(100vh - 150px);
+            overflow-y: auto;
+            background: #fff;
+            
+            /* Hidden State Desktop */
+            width: 0;
+            opacity: 0;
+            margin-right: 0;
+            padding-right: 0;
+            overflow-x: hidden;
+            transition: all 0.4s ease;
         }
 
-        /* ANIMATIONS & INPUTS */
-        @keyframes flicker { 0% { opacity: 0; } 6% { opacity: 1; } 7% { opacity: 0; } 9% { opacity: 1; } 11% { opacity: 1; } 16% { opacity: 0; } 17% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0.8; } 42% { opacity: 1; } 100% { opacity: 1; } }
-        @keyframes simpleFadeIn { to { opacity: 1; } }
+        .filter-sidebar.open {
+            /* Open State Desktop */
+            width: 320px;
+            opacity: 1;
+            margin-right: 40px;
+            padding-right: 20px;
+        }
+
+        .mobile-close-header { display: none; }
+
+        /* --- MOBILE STYLES --- */
+        @media (max-width: 768px) {
+            .hero-container { height: 500px; } 
+            .hero-text-box { padding: 20px 20px; width: 90%; }
+            .hero-title { font-size: 3.5rem !important; } 
+            .hero-subtitle { font-size: 0.8rem !important; }
+
+            .top-bar-container { flex-wrap: wrap; gap: 15px; }
+            .top-bar-right { gap: 10px; }
+            .main-content-pad { padding: 0 15px !important; }
+            .grid-responsive { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px 15px; }
+
+            /* SIDEBAR MOBILE OVERRIDE */
+            .filter-sidebar {
+                position: fixed !important;
+                top: 0; left: 0;
+                height: 100vh !important;
+                width: 100vw !important;
+                z-index: 9999;
+                margin: 0 !important;
+                padding: 20px !important;
+                
+                /* Hidden State Mobile (Slide out) */
+                transform: translateX(-100%);
+                opacity: 1; /* Keep opacity 1 so it doesn't fade, just slides */
+                width: 100vw !important;
+            }
+
+            .filter-sidebar.open {
+                /* Open State Mobile (Slide in) */
+                transform: translateX(0);
+                width: 100vw !important;
+            }
+
+            /* Show Close Button on Mobile */
+            .mobile-close-header { 
+                display: flex; justify-content: space-between; align-items: center;
+                margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #000;
+                font-family: 'Bebas Neue', sans-serif; fontSize: 1.5rem; cursor: pointer;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .hero-title { font-size: 2.8rem !important; }
+        }
+
+        /* --- OTHER STYLES --- */
+        .top-bar-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; width: 100%; }
+        .top-bar-right { display: flex; align-items: center; gap: 20px; }
+        .filter-toggle-btn { background-color: #000; color: #fff; border: none; padding: 12px 25px; fontSize: 0.9rem; fontWeight: 700; cursor: pointer; letter-spacing: 1px; fontFamily: 'Lato'; display: flex; alignItems: center; border-radius: 4px; }
         
         .custom-select-wrapper { position: relative; width: 100%; }
-        .custom-select { width: 100%; padding: 12px 15px; appearance: none; -webkit-appearance: none; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 0px; font-family: 'Lato', sans-serif; fontSize: 0.9rem; font-weight: 500; color: #333; cursor: pointer; transition: all 0.2s ease; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
-        .custom-select:hover, .custom-input:hover { border-color: #000; }
-        .custom-select:focus, .custom-input:focus { outline: none; border-color: #000; background-color: #fafafa; }
-        .custom-input { width: 100%; padding: 12px 15px; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 0px; font-family: 'Lato', sans-serif; fontSize: 0.95rem; color: #333; transition: all 0.2s ease; }
+        .custom-select { width: 100%; padding: 12px 15px; appearance: none; -webkit-appearance: none; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 0px; font-family: 'Lato', sans-serif; fontSize: 0.9rem; font-weight: 500; color: #333; cursor: pointer; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
+        .custom-input { width: 100%; padding: 12px 15px; background-color: #fff; border: 1px solid #e0e0e0; border-radius: 0px; font-family: 'Lato', sans-serif; fontSize: 0.95rem; color: #333; }
 
         .product-card { opacity: 0; animation: fadeInUp 0.5s ease-out forwards; cursor: pointer; border: 1px solid #b75784}
         .product-card:hover .product-image { transform: scale(1.1); }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes flicker { 0% { opacity: 0; } 6% { opacity: 1; } 7% { opacity: 0; } 9% { opacity: 1; } 11% { opacity: 1; } 16% { opacity: 0; } 17% { opacity: 1; } 40% { opacity: 1; } 41% { opacity: 0.8; } 42% { opacity: 1; } 100% { opacity: 1; } }
+        @keyframes simpleFadeIn { to { opacity: 1; } }
       `}</style>
     </div>
   );
@@ -299,20 +374,9 @@ const FilterAccordion = ({ title, children, isOpen, onToggle }) => {
 };
 
 // STYLES
-const topBarStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', width: '100%' };
 const flexContainerStyle = { display: 'flex', alignItems: 'flex-start', width: '100%' };
-const stickyWrapperStyle = { position: 'sticky', top: '120px', alignSelf: 'flex-start', zIndex: 50 };
-const animatedSidebarStyle = { overflowX: 'hidden', overflowY: 'auto', maxHeight: 'calc(100vh - 150px)', transition: 'all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)', whiteSpace: 'nowrap' };
-const filterToggleBtn = { backgroundColor: '#000', color: '#fff', border: 'none', padding: '12px 25px', fontSize: '0.9rem', fontWeight: '700', cursor: 'pointer', letterSpacing: '1px', fontFamily: 'Lato', display: 'flex', alignItems: 'center', borderRadius: '4px', transition: 'opacity 0.2s ease' };
-const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '50px 40px' };
 const imageContainerStyle = { overflow: 'hidden', backgroundColor: '#fff', aspectRatio: '1 / 1.1', display: 'flex', alignItems: 'center', justifyContent: 'center' };
-const imageStyle = { 
-    width: '100%', 
-    height: '100%', 
-    objectFit: 'contain', 
-    padding: '10px',
-    transition: 'transform 0.5s ease' 
-};
+const imageStyle = { width: '100%', height: '100%', objectFit: 'contain', padding: '10px', transition: 'transform 0.5s ease' };
 const brandStyle = { margin: '0 0 5px', color: '#764a6aff', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '700' };
 const titleStyle = { margin: '0 0 10px', fontFamily: '"Lato", sans-serif', fontSize: '1.2rem', fontWeight: '900', color: '#111' };
 const priceStyle = { margin: '0', fontFamily: '"Lato", sans-serif', fontSize: '1rem', fontWeight: 'bold', color: '#333' };
