@@ -14,6 +14,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # CORE
 # -----------------------------------------------------------------------------
 SECRET_KEY = config("SECRET_KEY", default="CHANGE_ME_IN_RENDER_ENV")
+
+# Security: Default to False in production (Railway), True locally
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = ['*']
@@ -47,9 +49,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # must be at the top
+    "corsheaders.middleware.CorsMiddleware",  # MUST BE AT THE TOP
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # Render static
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # Static files
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -127,22 +129,22 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # -----------------------------------------------------------------------------
-# CORS & CSRF
+# CORS & CSRF (CRITICAL FIXES)
 # -----------------------------------------------------------------------------
-SHARED_ORIGINS = config(
-    "CORS_ALLOWED_ORIGINS",
-    default="https://shoesteraj.pages.dev,http://localhost:3000,http://127.0.0.1:3000,http://localhost:3000,http://127.0.0.1:3000,http://localhost:3006,http://127.0.0.1:3006",
-    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
-)
 
-CORS_ALLOWED_ORIGINS = SHARED_ORIGINS
-CSRF_TRUSTED_ORIGINS = SHARED_ORIGINS
-
-CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^https:\/\/.*\.shoesteraj\.pages\.dev$",
-]
+# 1. Allow all origins to prevent 502/CORS blocking on initial deploy
+CORS_ALLOW_ALL_ORIGINS = True 
 
 CORS_ALLOW_CREDENTIALS = True
+
+# 2. Trust your specific Railway URLs (Frontend AND Backend)
+# This prevents "CSRF Verification Failed" when logging in.
+CSRF_TRUSTED_ORIGINS = [
+    "https://suzerajfrontend-production.up.railway.app",
+    "https://suzeraj-production.up.railway.app",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 
 # -----------------------------------------------------------------------------
 # DRF
@@ -168,16 +170,16 @@ DJOSER = {
     "LOGIN_FIELD": "username",
     "PASSWORD_RESET_CONFIRM_URL": "password-reset/confirm/{uid}/{token}",
     "SEND_ACTIVATION_EMAIL": False,
-    "SERIALIZERS": {'user_create': 'users.serializers.UserCreateSerializer',
+    "SERIALIZERS": {
+        'user_create': 'users.serializers.UserCreateSerializer',
         'user': 'users.serializers.UserSerializer',
-        'current_user': 'users.serializers.UserSerializer',},
+        'current_user': 'users.serializers.UserSerializer',
+    },
 }
 
 # -----------------------------------------------------------------------------
-# EMAIL (BREVO API - WORKS ON RENDER FREE)
+# EMAIL (BREVO API)
 # -----------------------------------------------------------------------------
-# settings.py
-
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 ANYMAIL = {
     "BREVO_API_KEY": config("BREVO_API_KEY", default=""),
@@ -187,7 +189,7 @@ DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@shoesteraj.co
 EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=15, cast=int)
 
 # -----------------------------------------------------------------------------
-# LOGGING (Consolidated)
+# LOGGING
 # -----------------------------------------------------------------------------
 LOGGING = {
     "version": 1,
@@ -198,18 +200,15 @@ LOGGING = {
         },
     },
     "loggers": {
-        # Werkzeug server logs (runserver_plus output)
         "werkzeug": {
             "handlers": ["console"],
             "level": "INFO",
             "propagate": True,
         },
-        # General Django logs
         "django": {
             "handlers": ["console"],
             "level": "INFO",
         },
-        # Email logs
         "anymail": {
             "handlers": ["console"],
             "level": "INFO",
@@ -221,16 +220,19 @@ LOGGING = {
 # -----------------------------------------------------------------------------
 # SECURITY (PROD)
 # -----------------------------------------------------------------------------
-# Only use these settings if DEBUG is False (Production)
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     USE_X_FORWARDED_HOST = True
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    CSRF_TRUSTED_ORIGINS = ["https://web-production-xxxx.up.railway.app"]
+    
+    # Redundant but safe: Ensure the frontend is trusted here too
+    CSRF_TRUSTED_ORIGINS = [
+        "https://suzerajfrontend-production.up.railway.app",
+        "https://suzeraj-production.up.railway.app"
+    ]
 else:
-    # Optional: explicit settings for local dev to be safe
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
