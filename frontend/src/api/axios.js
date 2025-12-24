@@ -1,10 +1,8 @@
 import axios from "axios";
 
-const API = process.env.REACT_APP_API_URL;
-
-if (!API) {
-  throw new Error("Missing REACT_APP_API_URL. Set it in Cloudflare Pages env vars.");
-}
+// If the environment variable exists (Railway), use it.
+// Otherwise, fall back to localhost (Your Laptop).
+const API = process.env.REACT_APP_API_URL || "http://127.0.0.1:8000";
 
 const api = axios.create({
   baseURL: API,

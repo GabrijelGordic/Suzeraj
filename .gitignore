@@ -5,6 +5,7 @@ db.sqlite3
 .env
 venv/
 env/
+staticfiles/   <-- ADD THIS LINE
 
 # React / Node
 node_modules/

@@ -16,11 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="CHANGE_ME_IN_RENDER_ENV")
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = config(
-    "ALLOWED_HOSTS",
-    default="localhost,127.0.0.1,suzeraj-backend.onrender.com",
-    cast=lambda v: [s.strip() for s in v.split(",") if s.strip()],
-)
+ALLOWED_HOSTS = ['*']
 
 # -----------------------------------------------------------------------------
 # APPLICATIONS
@@ -232,6 +228,7 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    CSRF_TRUSTED_ORIGINS = ["https://web-production-xxxx.up.railway.app"]
 else:
     # Optional: explicit settings for local dev to be safe
     SECURE_SSL_REDIRECT = False
