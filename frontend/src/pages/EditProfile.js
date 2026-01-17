@@ -15,6 +15,7 @@ const EditProfile = () => {
   
   // UI State
   const [loading, setLoading] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false); // New state to track if we fetched data
   const [successMsg, setSuccessMsg] = useState('');
   
   // Form State
@@ -54,45 +55,58 @@ const EditProfile = () => {
   }, [countryCode]);
 
   useEffect(() => {
+    // Only fetch if we have a user (logged in)
     if (user) {
-        // Fetch full profile data
-        api.get(`/api/profiles/${user.username}/`)
+        // CHANGED: Fetch from /auth/users/me/ because your UserSerializer 
+        // contains ALL the fields (first_name, last_name, location, phone, bio).
+        api.get('/auth/users/me/')
             .then(res => {
                 const data = res.data;
                 
+                // 1. Populate Text Fields
                 setFormData({
-                    first_name: user.first_name || '',
-                    last_name: user.last_name || '',
-                    email: user.email || '',
-                    username: user.username || '',
+                    first_name: data.first_name || '',
+                    last_name: data.last_name || '',
+                    email: data.email || '',
+                    username: data.username || '',
                     bio: data.bio || ''
                 });
 
-                // Avatar
-                if (data.avatar && !data.avatar.includes('default')) {
+                // 2. Populate Avatar
+                if (data.avatar) {
                     setPreview(data.avatar);
                 }
 
-                // Location
+                // 3. Populate Location (Parse "City, Country")
                 if (data.location) {
                     const parts = data.location.split(',');
                     if (parts.length >= 2) {
                         const existingCity = parts[0].trim();
                         const existingCountry = parts[1].trim();
+                        
+                        // Find country object to get ISO Code (needed for city list)
                         const foundCountry = COUNTRIES_LIST.find(c => c.name === existingCountry);
+                        
                         if (foundCountry) {
                             setCountryCode(foundCountry.isoCode);
                             setCountryName(foundCountry.name);
                             setCity(existingCity);
+                            
+                            // Set default dial code if phone is missing
                             if (!data.phone_number) setDialCode(foundCountry.phonecode);
                         }
                     }
                 }
 
-                // Phone
+                // 4. Populate Phone (Parse "+CodeDigits")
                 if (data.phone_number) {
                     const raw = data.phone_number.replace('+', '');
-                    const matchedCountry = PHONE_CODES.find(c => raw.startsWith(c.phonecode));
+                    // Find which country code this number starts with
+                    // We reverse sort by length so we match "1242" before "1" to be accurate
+                    const matchedCountry = PHONE_CODES
+                        .sort((a,b) => b.phonecode.length - a.phonecode.length)
+                        .find(c => raw.startsWith(c.phonecode));
+                        
                     if (matchedCountry) {
                         setDialCode(matchedCountry.phonecode);
                         setPhoneDigits(raw.replace(matchedCountry.phonecode, ''));
@@ -100,8 +114,13 @@ const EditProfile = () => {
                         setPhoneDigits(raw);
                     }
                 }
+                
+                setDataLoaded(true);
             })
-            .catch(err => console.error("Error fetching profile:", err));
+            .catch(err => {
+                console.error("Error fetching profile:", err);
+                // Optional: navigate('/login') if 401
+            });
     }
   }, [user]);
 
@@ -137,8 +156,8 @@ const EditProfile = () => {
 
   const renderAvatarPreview = () => {
       if (preview) return <img src={preview} alt="preview" style={avatarStyle} />;
-      // FIX: Check if user exists before accessing username
-      const initial = user && user.username ? user.username.charAt(0).toUpperCase() : '?';
+      // Safe check for username to prevent crash
+      const initial = formData.username ? formData.username.charAt(0).toUpperCase() : '?';
       return <div style={initialsAvatar}>{initial}</div>;
   };
 
@@ -154,8 +173,14 @@ const EditProfile = () => {
     const uploadData = new FormData();
     uploadData.append('first_name', formData.first_name);
     uploadData.append('last_name', formData.last_name);
-    uploadData.append('email', formData.email);
+    // Usually email is read-only in Djoser, but if your setting allows update:
+    // uploadData.append('email', formData.email); 
     uploadData.append('bio', formData.bio);
+    
+    // DRF UserSerializer expects these mapped to 'profile' via mapping, 
+    // but your PATCH endpoint likely handles flattened data if using the default Djoser endpoint structure,
+    // OR if you are using your custom ViewSet, ensure it accepts these fields.
+    // Based on serializers.py, the UserSerializer handles mapping automatically.
     uploadData.append('location', fullLocation);
     uploadData.append('phone_number', fullPhoneNumber);
 
@@ -170,6 +195,7 @@ const EditProfile = () => {
       
       setSuccessMsg('Details saved successfully.');
       setLoading(false);
+      // Reload to reflect changes
       setTimeout(() => { window.location.reload(); }, 1000);
 
     } catch (err) {
@@ -206,8 +232,8 @@ const EditProfile = () => {
       }
   };
 
-  // FIX: If user is not loaded yet, show loading instead of crashing
-  if (!user) {
+  // Loading State
+  if (!user || !dataLoaded) {
     return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading Account Settings...</div>;
   }
 
@@ -255,7 +281,7 @@ const EditProfile = () => {
 
                 <div style={{ marginBottom: '20px' }}>
                     <label style={labelStyle}>EMAIL ADDRESS</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} className="custom-input" placeholder="your@email.com" />
+                    <input type="email" name="email" value={formData.email} disabled className="custom-input" style={{ backgroundColor: '#f9f9f9', color: '#999', cursor: 'not-allowed' }} />
                 </div>
 
                 <div style={{ marginBottom: '20px' }}>
