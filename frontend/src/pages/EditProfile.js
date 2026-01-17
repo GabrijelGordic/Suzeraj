@@ -11,7 +11,6 @@ const EditProfile = () => {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   
-  // UI State
   const [loading, setLoading] = useState(false);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -25,14 +24,12 @@ const EditProfile = () => {
     bio: '' 
   });
 
-  // Location & Phone State
   const [countryCode, setCountryCode] = useState('');
   const [countryName, setCountryName] = useState('');
   const [city, setCity] = useState('');
   const [dialCode, setDialCode] = useState(''); 
   const [phoneDigits, setPhoneDigits] = useState('');
 
-  // Avatar State
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(null);
 
@@ -51,60 +48,42 @@ const EditProfile = () => {
         : [];
   }, [countryCode]);
 
-  // --- CHANGED: FETCH FROM BOTH ENDPOINTS ---
   useEffect(() => {
     if (user) {
-        // 1. Fetch Basic Identity (Names, Email) from Auth endpoint
-        api.get('/auth/users/me/')
-            .then(userRes => {
-                const userData = userRes.data;
-                const targetUsername = userData.username; // Use the username returned from API
-
-                // 2. Fetch Details (Location, Phone) from Profile endpoint
-                // We chain this to ensure we have the correct username
-                return api.get(`/api/profiles/${targetUsername}/`).then(profileRes => {
-                    return { userData, profileData: profileRes.data };
-                });
-            })
-            .then(({ userData, profileData }) => {
-                // --- MERGE DATA ---
+        // FETCH FROM NEW ENDPOINT
+        api.get('/api/manage-profile/')
+            .then(res => {
+                const data = res.data;
                 
-                // 1. Set Form Fields
                 setFormData({
-                    first_name: userData.first_name || '',
-                    last_name: userData.last_name || '',
-                    email: userData.email || '',
-                    username: userData.username || '',
-                    // Check both places for Bio (it is often in Profile)
-                    bio: profileData.bio || userData.bio || '' 
+                    first_name: data.first_name || '',
+                    last_name: data.last_name || '',
+                    email: data.email || '',
+                    username: data.username || '',
+                    bio: data.bio || ''
                 });
 
-                // 2. Set Avatar (Prefer profile data)
-                if (profileData.avatar) {
-                    setPreview(profileData.avatar);
+                if (data.avatar && !data.avatar.includes('default')) {
+                    setPreview(data.avatar);
                 }
 
-                // 3. Set Location (From Profile Data)
-                if (profileData.location) {
-                    const parts = profileData.location.split(',');
+                if (data.location) {
+                    const parts = data.location.split(',');
                     if (parts.length >= 2) {
                         const existingCity = parts[0].trim();
                         const existingCountry = parts[1].trim();
-                        
                         const foundCountry = COUNTRIES_LIST.find(c => c.name === existingCountry);
                         if (foundCountry) {
                             setCountryCode(foundCountry.isoCode);
                             setCountryName(foundCountry.name);
                             setCity(existingCity);
-                            if (!profileData.phone_number) setDialCode(foundCountry.phonecode);
+                            if (!data.phone_number) setDialCode(foundCountry.phonecode);
                         }
                     }
                 }
 
-                // 4. Set Phone (From Profile Data)
-                if (profileData.phone_number) {
-                    const raw = profileData.phone_number.replace('+', '');
-                    // Sort by length (desc) to match longest country code first (e.g. 1242 vs 1)
+                if (data.phone_number) {
+                    const raw = data.phone_number.replace('+', '');
                     const matchedCountry = PHONE_CODES
                         .sort((a,b) => b.phonecode.length - a.phonecode.length)
                         .find(c => raw.startsWith(c.phonecode));
@@ -116,14 +95,10 @@ const EditProfile = () => {
                         setPhoneDigits(raw);
                     }
                 }
-
+                
                 setDataLoaded(true);
             })
-            .catch(err => {
-                console.error("Error fetching profile:", err);
-                // Even if profile fetch fails, show what we have
-                setDataLoaded(true);
-            });
+            .catch(err => console.error("Error fetching profile:", err));
     }
   }, [user]);
 
@@ -163,6 +138,7 @@ const EditProfile = () => {
       return <div style={initialsAvatar}>{initial}</div>;
   };
 
+  // --- SUBMIT ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -174,7 +150,7 @@ const EditProfile = () => {
     const uploadData = new FormData();
     uploadData.append('first_name', formData.first_name);
     uploadData.append('last_name', formData.last_name);
-    uploadData.append('bio', formData.bio); 
+    uploadData.append('bio', formData.bio);
     uploadData.append('location', fullLocation);
     uploadData.append('phone_number', fullPhoneNumber);
 
@@ -183,9 +159,8 @@ const EditProfile = () => {
     }
 
     try {
-      // FIX: Do NOT set 'Content-Type': 'multipart/form-data' manually.
-      // Axios detects FormData and adds the correct boundary automatically.
-      await api.patch('/auth/users/me/', uploadData);
+      // POST TO NEW ENDPOINT
+      await api.patch('/api/manage-profile/', uploadData);
       
       setSuccessMsg('Details saved successfully.');
       setLoading(false);
