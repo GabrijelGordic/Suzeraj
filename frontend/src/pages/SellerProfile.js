@@ -68,28 +68,31 @@ const SellerProfile = () => {
   if (loading) return <div style={{ display:'flex', justifyContent:'center', alignItems:'center', height:'80vh' }}>LOADING...</div>;
   if (!profile) return <div style={{ display:'flex', justifyContent:'center', alignItems:'center', height:'80vh' }}>USER NOT FOUND.</div>;
 
-  // --- FIX: ROBUST OWNERSHIP CHECK ---
-  let currentUsername = null;
-  
-  if (user) {
-      // 1. Check top level (Django style)
-      if (user.username) {
-          currentUsername = user.username;
-      } 
-      // 2. Check metadata (Supabase style)
-      else if (user.user_metadata && user.user_metadata.username) {
-          currentUsername = user.user_metadata.username;
+  // --- LOGIC: CHECK IF LOGGED IN USER OWNS THIS PROFILE ---
+  let isOwnProfile = false;
+
+  if (user && profile) {
+      // 1. Try Email Match (Most Reliable)
+      if (user.email && profile.email && user.email.toLowerCase() === profile.email.toLowerCase()) {
+          isOwnProfile = true;
       }
-      // 3. Fallback to email prefix if needed (optional)
-      else if (user.email) {
-          // currentUsername = user.email.split('@')[0]; 
+      // 2. Try Username Match (Fallback)
+      else {
+          const supabaseUsername = user.user_metadata?.username || user.username || '';
+          if (supabaseUsername && supabaseUsername.toLowerCase() === profile.username.toLowerCase()) {
+              isOwnProfile = true;
+          }
       }
+      
+      // DEBUG: If this still fails, look at your browser console (F12)
+      // console.log("Is Own Profile Check:", {
+      //    authEmail: user.email,
+      //    profileEmail: profile.email, 
+      //    authUsername: user.user_metadata?.username || user.username,
+      //    profileUsername: profile.username,
+      //    result: isOwnProfile
+      // });
   }
-
-  // console.log("Current User:", currentUsername, "| Profile User:", profile.username); // Uncomment to debug
-
-  const isOwnProfile = profile && currentUsername && 
-      (currentUsername.toLowerCase() === profile.username.toLowerCase());
 
   return (
     <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', padding: '60px 20px' }}>
@@ -109,7 +112,7 @@ const SellerProfile = () => {
                         </div>
                     </div>
                     
-                    {/* BUTTONS: Hide 'Write Review' if it is your own profile */}
+                    {/* BUTTONS: HIDE if isOwnProfile is true */}
                     <div>
                         {isOwnProfile ? (
                             <Link to="/edit-profile" style={btnStyle}>EDIT PROFILE</Link>
@@ -138,6 +141,7 @@ const SellerProfile = () => {
         <div style={divider}></div>
 
         {/* --- REVIEW FORM --- */}
+        {/* DOUBLE CHECK: Do not render if isOwnProfile */}
         {!isOwnProfile && isReviewing && (
             <div style={reviewFormCard}>
                 <h3 style={{marginTop:0, fontFamily:'Bebas Neue', fontSize:'1.5rem'}}>LEAVE A REVIEW FOR @{profile.username}</h3>
