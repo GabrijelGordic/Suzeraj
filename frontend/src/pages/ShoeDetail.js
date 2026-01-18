@@ -22,12 +22,23 @@ const ShoeDetail = () => {
     api.get(`/api/shoes/${id}/`)
       .then(res => {
         setShoe(res.data);
-        const images = [res.data.image];
-        if (res.data.images && Array.isArray(res.data.images)) {
-            images.push(...res.data.images.map(imgObj => imgObj.image));
-        }
-        setAllImages(images);
-        setMainImage(res.data.image);
+        
+        // --- FIX: REMOVE DUPLICATES ---
+        const mainImg = res.data.image;
+        
+        // 1. Get gallery images (if any)
+        const galleryImgs = (res.data.images && Array.isArray(res.data.images)) 
+            ? res.data.images.map(imgObj => imgObj.image) 
+            : [];
+
+        // 2. Create a Set to automatically remove duplicate URLs
+        // We put the main image first, then the gallery images
+        const uniqueImages = [...new Set([mainImg, ...galleryImgs])];
+
+        setAllImages(uniqueImages);
+        setMainImage(mainImg);
+        // ------------------------------
+
         setIsLiked(res.data.is_liked);
         setLoading(false);
       })

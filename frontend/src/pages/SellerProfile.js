@@ -15,7 +15,6 @@ const SellerProfile = () => {
   const [comment, setComment] = useState('');
   const [reviewLoading, setReviewLoading] = useState(false);
 
-  // FIX: Wrap fetchProfile in useCallback to stabilize the function reference
   const fetchProfile = useCallback(() => {
     api.get(`/api/profiles/${username}/`)
       .then(res => {
@@ -26,9 +25,8 @@ const SellerProfile = () => {
         console.error("Error fetching profile:", err);
         setLoading(false);
       });
-  }, [username]); // Only recreate this function if 'username' changes
+  }, [username]); 
 
-  // FIX: Now we can safely include fetchProfile in the dependency array
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
@@ -42,14 +40,13 @@ const SellerProfile = () => {
               rating: rating,
               comment: comment
           });
-          // Refresh profile to show new review
           setIsReviewing(false);
           setComment('');
           setRating(5);
           fetchProfile(); 
       } catch (err) {
           console.error(err);
-          alert('Failed to submit review.');
+          alert('Failed to submit review. ' + (err.response?.data?.[0] || ''));
       } finally {
           setReviewLoading(false);
       }
@@ -71,7 +68,9 @@ const SellerProfile = () => {
   if (loading) return <div style={{ display:'flex', justifyContent:'center', alignItems:'center', height:'80vh' }}>LOADING...</div>;
   if (!profile) return <div style={{ display:'flex', justifyContent:'center', alignItems:'center', height:'80vh' }}>USER NOT FOUND.</div>;
 
-  const isOwnProfile = user && user.username === profile.username;
+  // --- FIX: ROBUST OWNERSHIP CHECK ---
+  // We use lowercase to ensure "User" and "user" match correctly
+  const isOwnProfile = user && profile && (user.username.toLowerCase() === profile.username.toLowerCase());
 
   return (
     <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', padding: '60px 20px' }}>
@@ -91,7 +90,7 @@ const SellerProfile = () => {
                         </div>
                     </div>
                     
-                    {/* BUTTONS: EDIT or WRITE REVIEW */}
+                    {/* BUTTONS: Hide 'Write Review' if it is your own profile */}
                     <div>
                         {isOwnProfile ? (
                             <Link to="/edit-profile" style={btnStyle}>EDIT PROFILE</Link>
@@ -120,7 +119,8 @@ const SellerProfile = () => {
         <div style={divider}></div>
 
         {/* --- REVIEW FORM --- */}
-        {isReviewing && (
+        {/* FIX: Added !isOwnProfile check here too, just in case */}
+        {!isOwnProfile && isReviewing && (
             <div style={reviewFormCard}>
                 <h3 style={{marginTop:0, fontFamily:'Bebas Neue', fontSize:'1.5rem'}}>LEAVE A REVIEW FOR @{profile.username}</h3>
                 <form onSubmit={handleReviewSubmit}>
